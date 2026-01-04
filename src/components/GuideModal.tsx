@@ -122,30 +122,7 @@ export const GuideModal = forwardRef<GuideModalRef, {}>((_, ref) => {
                                 <div className="pt-4 mt-2 text-sm text-muted-foreground space-y-2 border-t border-dashed border-border/50 whitespace-pre-wrap">
                                     <p>{t.guide.sections.sponsorblock_text}</p>
                                 </div>
-                            </details>
-                        </div>
-                    </section>
-
-                    {/* 3. Keyboard Shortcuts (New) */}
-                    <section className="space-y-4">
-                        <h4 className="font-bold text-lg flex items-center gap-2 border-b pb-2"><Settings className="w-5 h-5 text-purple-500"/> {t.guide.sections.shortcuts}</h4>
-                        <div className="p-4 bg-secondary/10 rounded-xl border border-secondary/50">
-                            <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
-                                {/* Use simple markdown-like rendering or just map lines */}
-                                {t.guide.sections.shortcuts_list.split('\n').map((line, i) => {
-                                    const parts = line.split('**:')
-                                    return (
-                                        <div key={i} className="flex justify-between items-center py-2 border-b border-dashed border-border/50 last:border-0 hover:bg-secondary/30 px-2 rounded transition-colors">
-                                            <span className="font-mono font-bold bg-secondary/50 px-2 py-0.5 rounded text-xs">
-                                                {line.includes('**') ? line.split('**')[1] : line}
-                                            </span>
-                                            <span className="text-muted-foreground">
-                                                {line.includes('**:') ? parts[1] : ''}
-                                            </span>
-                                        </div>
-                                    )
-                                })}
-                            </div>
+                        </details>
                         </div>
                     </section>
                     
@@ -200,24 +177,11 @@ export const GuideModal = forwardRef<GuideModalRef, {}>((_, ref) => {
                             useAppStore.getState().updateSettings({ ...settings, hasSeenOnboarding: false })
                             window.location.reload() // Force reload to trigger onboarding
                         }}
-                        className="text-xs text-muted-foreground hover:text-primary underline flex items-center gap-1"
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-secondary/50"
                     >
-                         <Rocket className="w-3 h-3" />
+                         <Rocket className="w-3.5 h-3.5" />
                          {t.guide.sections.replay_tour}
                     </button>
-
-                    <div className="hidden md:flex items-center gap-4 ml-auto mr-6 opacity-60 hover:opacity-100 transition-opacity">
-                        <div className="flex gap-2 text-[10px] font-medium bg-secondary/50 p-1.5 rounded-lg border">
-                            <span className="bg-background px-1 rounded border shadow-sm">Ctrl + N</span>
-                            <span className="text-muted-foreground px-0.5">=</span>
-                            <span>{t.downloads.new_download}</span>
-                        </div>
-                        <div className="flex gap-2 text-[10px] font-medium bg-secondary/50 p-1.5 rounded-lg border">
-                            <span className="bg-background px-1 rounded border shadow-sm">Ctrl + ,</span>
-                            <span className="text-muted-foreground px-0.5">=</span>
-                            <span>{t.nav.settings}</span>
-                        </div>
-                    </div>
 
                     <button
                         onClick={() => dialogRef.current?.close()}

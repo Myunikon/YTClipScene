@@ -1,4 +1,5 @@
-import { AlertCircle, Plus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { AlertCircle, Plus, ImageOff } from 'lucide-react'
 import { translations } from '../../lib/locales'
 
 interface VideoPreviewProps {
@@ -12,6 +13,13 @@ interface VideoPreviewProps {
 }
 
 export function VideoPreview({ loading, meta, error, t }: VideoPreviewProps) {
+    const [imgError, setImgError] = useState(false)
+
+    // Reset error when thumbnail changes
+    useEffect(() => {
+        setImgError(false)
+    }, [meta?.thumbnail])
+
     return (
         <div className="w-full h-40 bg-secondary/30 relative flex items-center justify-center text-center border-b border-white/5 shrink-0 overflow-hidden group">
             <div className="absolute inset-0 bg-black/5 z-0"></div>
@@ -26,7 +34,18 @@ export function VideoPreview({ loading, meta, error, t }: VideoPreviewProps) {
                 </div>
             ) : meta ? (
                 <>
-                    <img src={meta.thumbnail} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500 blur-[2px] group-hover:blur-0" alt="Thumbnail Background" />
+                    {!imgError ? (
+                        <img 
+                            src={meta.thumbnail} 
+                            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500 blur-[2px] group-hover:blur-0" 
+                            alt="Thumbnail Background"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-secondary/50">
+                            <ImageOff className="w-12 h-12 text-muted-foreground/30" />
+                        </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
                     <div className="relative z-20 p-6 flex flex-col justify-end h-full w-full text-left">
                         <h4 className="font-bold text-white text-lg line-clamp-2 leading-tight drop-shadow-md">{meta.title}</h4>

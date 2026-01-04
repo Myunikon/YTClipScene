@@ -18,7 +18,14 @@ export const createSystemSlice: StateCreator<AppState, [], [], SystemSlice> = (s
   ytdlpVersion: null,
   ytdlpLatestVersion: null,
   ytdlpNeedsUpdate: false,
-  ytdlpUpdateUrgency: 'none' as const,
+  
+  // FFmpeg Version Tracking
+  ffmpegVersion: null,
+  ffmpegLatestVersion: null,
+  ffmpegNeedsUpdate: false,
+  
+  // Loading state
+  isCheckingUpdates: false,
 
   setBinariesReady: (ready) => set({ binariesReady: ready }),
 
@@ -175,14 +182,28 @@ export const createSystemSlice: StateCreator<AppState, [], [], SystemSlice> = (s
     }
   },
 
-  checkYtDlpUpdate: async () => {
-      // Just check strictly sidecar version
-      const v = await getBinaryVersion('yt-dlp')
-      set({ ytdlpVersion: v })
-  },
-
-  updateYtDlp: async () => {
-    // Disabled
-    console.log('Update disabled in sidecar mode')
+  checkBinaryUpdates: async () => {
+      set({ isCheckingUpdates: true })
+      try {
+          const { checkForUpdates } = await import('../../lib/updater-service')
+          const result = await checkForUpdates()
+          
+          set({
+              ytdlpVersion: result.ytdlp.current,
+              ytdlpLatestVersion: result.ytdlp.latest,
+              ytdlpNeedsUpdate: result.ytdlp.hasUpdate,
+              ffmpegVersion: result.ffmpeg.current,
+              ffmpegLatestVersion: result.ffmpeg.latest,
+              ffmpegNeedsUpdate: result.ffmpeg.hasUpdate
+          })
+          
+          get().addLog(`[Version Check] yt-dlp: ${result.ytdlp.current} → ${result.ytdlp.latest || 'N/A'} (Update: ${result.ytdlp.hasUpdate})`)
+          get().addLog(`[Version Check] FFmpeg: ${result.ffmpeg.current} → ${result.ffmpeg.latest || 'N/A'} (Update: ${result.ffmpeg.hasUpdate})`)
+      } catch (e) {
+          console.error('Version check failed:', e)
+          get().addLog(`[Version Check] Failed: ${e}`)
+      } finally {
+          set({ isCheckingUpdates: false })
+      }
   },
 })

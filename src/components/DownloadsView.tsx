@@ -7,8 +7,8 @@ export function DownloadsView() {
   const { tasks, settings } = useAppStore()
   const t = translations[settings.language].downloads
   
-  // displayTasks includes all tasks to show history as well
-  const displayTasks = tasks.filter(t => ['pending', 'fetching_info', 'downloading', 'error', 'paused', 'completed', 'stopped'].includes(t.status))
+  // Only show active/in-progress tasks - completed/stopped go to History
+  const displayTasks = tasks.filter(t => ['pending', 'fetching_info', 'downloading', 'error', 'paused'].includes(t.status))
 
   if (displayTasks.length === 0) {
     return <DownloadEmptyState t={t} />

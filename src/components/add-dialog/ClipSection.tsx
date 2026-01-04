@@ -42,12 +42,33 @@ export function ClipSection({
 }: ClipSectionProps) {
     return (
         <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-secondary/10 border border-transparent hover:border-primary/20 transition-all cursor-pointer" onClick={() => setIsClipping(!isClipping)}>
-                <div className="flex items-center gap-2">
-                    <Scissors className={`w-4 h-4 ${isClipping ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <span className={`text-sm font-semibold ${isClipping ? 'text-foreground' : 'text-muted-foreground'}`}>{t.trim_video}</span>
+            <div 
+                className={cn(
+                    "flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer",
+                    isClipping 
+                        ? "bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-orange-500/50 shadow-lg shadow-orange-500/10" 
+                        : "bg-secondary/10 border-white/5 hover:bg-secondary/20 hover:border-white/10"
+                )} 
+                onClick={() => setIsClipping(!isClipping)}
+            >
+                <div className="flex items-center gap-3">
+                    <div className={cn(
+                        "p-2 rounded-lg",
+                        isClipping ? "bg-orange-500 text-white" : "bg-white/5 text-muted-foreground"
+                    )}>
+                        <Scissors className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <div className={cn(
+                            "font-bold text-sm",
+                            isClipping ? "text-orange-200" : "text-foreground"
+                        )}>{t.trim_video}</div>
+                        <div className="text-[10px] text-muted-foreground/60 leading-tight">
+                            Cut specific portion of the video
+                        </div>
+                    </div>
                 </div>
-                <Switch checked={isClipping} onCheckedChange={setIsClipping} />
+                <Switch checked={isClipping} onCheckedChange={setIsClipping} className={isClipping ? "data-[state=checked]:bg-orange-500" : ""} />
             </div>
 
             <AnimatePresence>

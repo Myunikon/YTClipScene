@@ -3,7 +3,7 @@ import { AppState, VideoSlice, DownloadTask } from './types'
 import { v4 as uuidv4 } from 'uuid'
 import { Child } from '@tauri-apps/plugin-shell'
 import { downloadDir, join } from '@tauri-apps/api/path'
-import { invoke } from '@tauri-apps/api/core'
+// invoke removed
 
 // Import Helper Lib
 import { toast } from 'sonner'
@@ -38,13 +38,14 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
       id,
       url,
       title: 'Queueing...',
-      status: 'pending',
+      status: options.scheduledTime ? 'scheduled' : 'pending',
       progress: 0,
       speed: '-',
       eta: '-',
       range: (options.rangeStart || options.rangeEnd) ? `${options.rangeStart || 0}-${options.rangeEnd || ''}` : 'Full',
       format: options.format || settings.resolution,
       path: downloadPath,
+      scheduledTime: options.scheduledTime,
       _options: options
     };
     
@@ -133,8 +134,25 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
         get().addLog(`Stream Found: ${streamUrls.length} sources. Merging Needed: ${needsMerging}`)
         
         // 2. Prepare Filename
-        const template = settings.filenameTemplate || '{title}.{ext}'
-        const finalName = sanitizeFilename(template, meta)
+        // IMPORTANT: Use settings.container (output format) NOT meta.ext (source format)
+        // yt-dlp converts webm to mp4 via --merge-output-format, so filename must match
+        const outputExt = options.format === 'audio' ? 'mp3' : (options.container || settings.container || 'mp4')
+        
+        let finalName: string
+        if (options.customFilename) {
+            // User-provided custom filename - sanitize and add extension
+            let sanitized = options.customFilename.replace(/[\\/:*?"<>|]/g, '_').replace(/\\.\\./g, '').trim()
+            // Add extension if not present
+            if (!sanitized.toLowerCase().endsWith(`.${outputExt}`)) {
+                sanitized = `${sanitized}.${outputExt}`
+            }
+            finalName = sanitized
+        } else {
+            // Template-based filename - override meta.ext with actual output extension
+            const template = settings.filenameTemplate || '{title}.{ext}'
+            const metaWithCorrectExt = { ...meta, ext: outputExt }
+            finalName = sanitizeFilename(template, metaWithCorrectExt)
+        }
         const fullOutputPath = await join(downloadPath, finalName)
 
         // 3. START DOWNLOAD (Native Phase)
@@ -164,7 +182,8 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
                  filePath: fullOutputPath,
                  speed: 'Starting Native Engine...',
                  eta: '...',
-                 ytdlpCommand: ytdlpCommandStr
+                 ytdlpCommand: ytdlpCommandStr,
+                 concurrentFragments: settings.concurrentFragments || 4
              })
 
              cmd.on('close', (data: any) => {
@@ -185,17 +204,53 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
              
              cmd.stdout.on('data', (line: any) => {
                  const str = line.toString()
+                 
+                 // Get current task for state tracking
+                 const currentTask = get().tasks.find(t => t.id === id)
+                 const isClipping = task.range !== 'Full'
+                 
+                 // Track download phases explicitly by detecting new Destination lines
+                 // yt-dlp outputs "[download] Destination: filename" when starting each stream
+                 if (isClipping && str.includes('[download] Destination:')) {
+                     const currentPhase = (currentTask as any)?._downloadPhase || 0
+                     updateTask(id, { _downloadPhase: currentPhase + 1 } as any)
+                 }
+                 
+                 // Track multi-phase downloads (video + audio + merge)
                  if (str.includes('[download]')) {
                      const percentMatch = str.match(/(\d+\.?\d*)%/)
                      const speedMatch = str.match(/at\s+(\d+\.?\d*\w+\/s)/)
                      const etaMatch = str.match(/ETA\s+(\S+)/)
 
                      if (percentMatch) {
-                         const p = parseFloat(percentMatch[1])
+                         let p = parseFloat(percentMatch[1])
                          const s = speedMatch ? speedMatch[1] : '-'
                          const e = etaMatch ? etaMatch[1] : '-'
-                         updateTask(id, { progress: p, speed: s, eta: e })
+                         
+                         // For clipped downloads: distribute progress across phases
+                         // Phase 1 = video (0-45%), Phase 2 = audio (45-90%), Merge = 90-100%
+                         if (isClipping) {
+                             const phase = (currentTask as any)?._downloadPhase || 1
+                             
+                             if (phase === 1) {
+                                 // Video phase: 0-45%
+                                 p = p * 0.45
+                             } else if (phase === 2) {
+                                 // Audio phase: 45-90%
+                                 p = 45 + (p * 0.45)
+                             } else {
+                                 // Additional phases if any: cap at 90%
+                                 p = Math.min(90, 45 + (p * 0.45))
+                             }
+                         }
+                         
+                         updateTask(id, { progress: Math.min(p, 99), speed: s, eta: e })
                      }
+                 }
+                 
+                 // Track merger progress for clips
+                 if (str.includes('[Merger]') || str.includes('[ffmpeg]')) {
+                     updateTask(id, { progress: 92, speed: 'Merging...', eta: '-' })
                  }
              })
 
@@ -229,6 +284,15 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
      set(state => ({ tasks: state.tasks.filter(t => t.status !== 'completed' && t.status !== 'stopped') }))
   },
 
+  importTasks: (importedTasks) => {
+    set(state => {
+        // Filter out tasks that already exist by ID
+        const existingIds = new Set(state.tasks.map(t => t.id))
+        const newTasks = importedTasks.filter(t => !existingIds.has(t.id))
+        return { tasks: [...state.tasks, ...newTasks] }
+    })
+  },
+
   updateTask: (id, updates) => {
     set(state => ({
       tasks: state.tasks.map(t => t.id === id ? { ...t, ...updates } : t)
@@ -260,35 +324,20 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
       const task = tasks.find(t => t.id === id)
       if(!task) return
 
-      const pid = activePidMap.get(id)
-      if (pid) {
+      // Kill logic to ensure download stops (yt-dlp resumes via --continue on restart)
+      const child = activeProcessMap.get(id)
+      if (child) {
           try {
-              // TRUE PAUSE: Suspend the process instead of killing
-              await invoke('suspend_process', { pid })
-              get().addLog(`[True Pause] Suspended process PID ${pid} for task ${id}`)
-              updateTask(id, { status: 'paused', speed: 'Paused', eta: '-' })
-          } catch(e: any) {
-              console.error("True pause failed, falling back to kill:", e)
-              // Fallback to kill if suspend fails
-              const child = activeProcessMap.get(id)
-              if (child) {
-                  try {
-                      await child.kill()
-                  } catch(e2) { console.error("Kill also failed:", e2) }
-                  activeProcessMap.delete(id)
-                  activePidMap.delete(id)
-              }
-              updateTask(id, { status: 'paused', speed: 'Paused (Killed)', eta: '-' })
+              await child.kill()
+              get().addLog(`[Pause] Killed process for task ${id} (will resume via restart)`)
+          } catch(e) {
+              console.error("Pause kill failed:", e)
           }
-      } else {
-          // No PID stored, use old method
-          const child = activeProcessMap.get(id)
-          if (child) {
-              try { await child.kill() } catch(e) { console.error("Pause kill failed:", e) }
-              activeProcessMap.delete(id)
-          }
-          updateTask(id, { status: 'paused', speed: 'Paused', eta: '-' })
+          activeProcessMap.delete(id)
+          activePidMap.delete(id)
       }
+      
+      updateTask(id, { status: 'paused', speed: 'Paused', eta: '-' })
   },
 
   retryTask: async (id) => {
@@ -306,23 +355,7 @@ export const createVideoSlice: StateCreator<AppState, [], [], VideoSlice> = (set
       const task = tasks.find(t => t.id === id)
       if(!task) return
 
-      const pid = activePidMap.get(id)
-      if (pid && task.status === 'paused') {
-          try {
-              // TRUE RESUME: Resume the suspended process
-              await invoke('resume_process', { pid })
-              get().addLog(`[True Resume] Resumed process PID ${pid} for task ${id}`)
-              updateTask(id, { status: 'downloading', speed: 'Resuming...', eta: '...' })
-              return // Process continues from where it left off
-          } catch(e: any) {
-              console.error("True resume failed, restarting task:", e)
-              // If resume fails, clean up and restart
-              activePidMap.delete(id)
-              activeProcessMap.delete(id)
-          }
-      }
-      
-      // Fallback: restart the task
+      // Restart is the most robust resume method for yt-dlp
       get().addLog(`Resuming Task ${id} (Restart)...`)
       updateTask(id, { status: 'pending', speed: 'Resuming...', eta: '...' })
       startTask(id)

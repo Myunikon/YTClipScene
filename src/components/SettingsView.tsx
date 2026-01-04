@@ -109,23 +109,30 @@ export function SettingsView({ toggleTheme, setPreviewLang }: SettingsViewProps)
                 )}
              </AnimatePresence>
             
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Settings className="w-6 h-6"/> {t.settings.title}</h2>
+            <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-primary to-blue-600 rounded-xl shadow-lg shadow-primary/20">
+                    <Settings className="w-6 h-6 text-white"/> 
+                </div>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                    {t.settings.title}
+                </span>
+            </h2>
             
             {/* Tabs Navigation */}
-            <div className="flex bg-secondary/30 p-1 rounded-xl mb-6 shrink-0 backdrop-blur-sm border">
+            <div className="flex glass p-1.5 rounded-2xl mb-8 shrink-0 border border-white/5 shadow-xl shadow-black/5">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
                         className={cn(
-                            "relative flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-colors z-10",
-                            activeTab === tab.id ? "text-primary-foreground" : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                            "relative flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all duration-300 z-10",
+                            activeTab === tab.id ? "text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                         )}
                     >
                         {activeTab === tab.id && (
                             <motion.div
                                 layoutId="settings-pill"
-                                className="absolute inset-0 bg-primary shadow-sm rounded-lg -z-10"
+                                className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 rounded-xl -z-10 shadow-lg shadow-primary/25"
                                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                             />
                         )}

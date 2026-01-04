@@ -7,6 +7,10 @@ export const translations = {
       tools: "Tools",
       terminal: "Terminal"
     },
+    error_boundary: {
+        title: "Something went wrong.",
+        reload: "Reload App"
+    },
     status: {
       missing: "Missing Components",
       downloading_bin: "Downloading Components...",
@@ -26,7 +30,9 @@ export const translations = {
       open_folder: "Open Folder",
       stop: "Stop",
       clear: "Clear",
-      empty: "No downloads yet.",
+      empty: "No downloads yet",
+      empty_description: "Paste a link or press Ctrl+N to start.",
+      plus_more: "+1000 more",
       headers: {
         title_url: "Title / URL",
         status: "Status",
@@ -60,7 +66,9 @@ export const translations = {
             start_minimized: "Start Minimized to Tray",
             close_action: "Close Button Action",
             minimize_tray: "Minimize to Tray",
-            quit_app: "Quit App"
+            quit_app: "Quit App",
+            low_perf_mode: "Low Performance Mode",
+            low_perf_desc: "Disable all animations to save battery"
         },
         downloads: {
             storage: "Storage",
@@ -76,7 +84,8 @@ export const translations = {
             audio: "Audio Only",
             metadata_title: "Metadata & Tags",
             embed_metadata: "Embed Metadata",
-            embed_thumbnail: "Embed Thumbnail"
+            embed_thumbnail: "Embed Thumbnail",
+            disable_play_button: "Disable Play Button"
         },
         network: {
             connection: "Connection",
@@ -84,6 +93,18 @@ export const translations = {
             warning_ip: "Warning: Too many simultaneous downloads may result in IP bans.",
             speed_limit: "Speed Limit",
             proxy: "Proxy URL",
+            user_agent: "User Agent",
+            concurrent_fragments: "Concurrent Fragments",
+            perf_tuning: "Performance Tuning:",
+            perf_safe: "1-4 (Safe): Best for general usage and stable downloads.",
+            perf_fast: "5-8 (Fast): Recommended for high-speed connections. Increases CPU usage.",
+            perf_aggressive: "9-16 (Aggressive): Maximum throughput. May cause temporary IP band (429 Too Many Requests) if abused.",
+            perf_warning: "* Applies to all download modes (Full Video, Audio, & Trim).",
+            placeholders: {
+                speed: "e.g. 5M, 500K",
+                proxy: "http://user:pass@host:port",
+                ua: "Mozilla/5.0..."
+            },
             turbo: "Turbo Mode",
             turbo_desc: "Use multi-threaded download engine for maximum speed."
         },
@@ -107,7 +128,26 @@ export const translations = {
             danger_desc: "Changing these paths may break the application.",
             redownload_ffmpeg: "Re-download FFmpeg (Force)",
             redownload_help: "Use this if FFmpeg is corrupted or missing dependencies.",
-            confirm_redownload: "Are you sure you want to force re-download FFmpeg?\\n\\nThis will overwrite the existing ‘ffmpeg.exe’ and might take a few minutes depending on your internet connection."
+            confirm_redownload: "Are you sure you want to force re-download FFmpeg?\\n\\nThis will overwrite the existing ‘ffmpeg.exe’ and might take a few minutes depending on your internet connection.",
+            developer_tools: "Developer Tools",
+            developer_mode: "Developer Mode",
+            developer_mode_desc: "Show command details on each download task",
+            data_management: "Data Management",
+            export_history: "Export History",
+            export_desc: "Save your download history to a JSON file",
+            export_btn: "Export",
+            import_history: "Import History",
+            import_desc: "Restore tasks from a backup file",
+            import_btn: "Import",
+            reset_defaults: "Reset to Defaults",
+            alerts: {
+                export_success: "History exported successfully!",
+                export_fail: "Failed to export history: ",
+                import_success: "Successfully imported {n} tasks!",
+                import_fail: "Failed to import history: ",
+                invalid_backup: "Invalid backup file format",
+                confirm_reset: "Are you sure you want to reset all settings to defaults?"
+            }
         },
         updater: {
             title: "Software Update",
@@ -116,7 +156,15 @@ export const translations = {
             error: "Version check failed.",
             checking: "Checking...",
             update_btn: "Check for Updates",
-            updating: "Updating..."
+            updating: "Updating...",
+            binary_versions: "Binary Versions",
+            check_updates: "Check for updates from GitHub",
+            current_ver: "Current",
+            not_checked: "Not checked",
+            unknown: "Unknown",
+            update_available: "Update Available",
+            up_to_date: "Up to date",
+            binary_bundled: "Binaries are bundled as sidecar. Manual update required if outdated."
         },
         setup: {
             title: "Additional Setup Required",
@@ -140,6 +188,13 @@ export const translations = {
             tauri_desc: "Build smaller, faster, and clearer applications. Bridges the Rust backend with the web frontend.",
             lucide_desc: "Beautiful & consistent icons. Adds visual clarity and modern aesthetics to the interface.",
             sb_desc: "A crowdsourced platform to skip sponsor segments in YouTube videos automatically.",
+            role_core: "Core Engine",
+            role_media: "Media Processing",
+            role_framework: "Framework",
+            role_ui: "UI Library",
+            role_icon: "Iconography",
+            role_api: "skipSegments API",
+            visit_website: "Visit Website",
             legal: "Legal Disclaimer",
             legal_text: "ClipSceneYT is for personal use (archiving, education). The developer is not affiliated with YouTube/Google. All usage risks, including copyright infringement or platform ToS violations, are the user's responsibility.",
             secret_found: "Secret Found!",
@@ -159,6 +214,22 @@ export const translations = {
       sponsor_label: "Remove Sponsors",
       cancel: "Cancel",
       download: "Download",
+      remove_sponsors: "Remove Sponsors",
+      remove_sponsors_desc: "Auto-skip intro, outro, & ads inside video",
+      subtitles_title: "Subtitles",
+      subtitles_desc: "Download & embed captions",
+      schedule_download: "Schedule Download",
+      schedule_desc: "Start task automatically at a later time",
+      subtitle_settings: "Subtitle Settings",
+      schedule_time: "Schedule Time",
+      embed_subs: "Embed into video file",
+      estimated_size: "Estimated Size",
+      trimmed: "TRIMMED",
+      pick_date: "Pick a date...",
+      set_time_next: "Set Time Next",
+      calendar: "Calendar",
+      time: "Time",
+      done: "Done",
       preview: {
         failed: "Preview Failed",
         no_data: "No data returned",
@@ -170,10 +241,31 @@ export const translations = {
         audio_wav: "Audio (WAV Lossless)",
         gif: "Animated GIF"
       },
+      quality_profiles: {
+          highest_quality: "Highest Quality",
+          standard: "Standard",
+          ultra_hd: "Ultra HD",
+          qhd: "QHD",
+          full_hd: "Full HD",
+          hd: "HD",
+          data_saver: "Data Saver"
+      },
+      audio_extraction: {
+          title: "Audio Extraction",
+          desc_auto: "High-performance extraction to MP3. Bitrates detected from source video.",
+          desc_manual: "High-performance extraction to MP3. Select target bitrate quality."
+      },
+      labels: {
+          quality_profile: "Quality Profile",
+          fmt: "Fmt:",
+          bitrate_quality: "Bitrate Quality"
+      },
       trim_video: "Trim Video",
       metadata_required: "Metadata required for slider",
       time_error: "Start time must be before End time",
-      restart: "Restart"
+      restart: "Restart",
+      filename_label: "Filename",
+      filename_placeholder: "Custom filename (optional)"
     },
     updater_banner: {
         update_available: "yt-dlp update available:",
@@ -213,7 +305,7 @@ export const translations = {
         sections: {
             started: "Getting Started",
             single: "Single Video Download",
-            single_text: "1. Copy the URL of the YouTube video you want to download.\n2. Click the (+) button in the top-right corner.\n3. The app will automatically detect the link from your clipboard.\n4. Select your desired format:\n   - Best Video+Audio: Highest quality available (MP4).\n   - 360p: Data saver resolution.\n   - Audio Only: Converts to MP3 or WAV.\n   - GIF: Creates an animated GIF.\n5. Click 'Download' to start.",
+            single_text: "1. Copy the URL of the YouTube video you want to download.\n2. Click the (+) button in the top-right corner.\n3. The app will automatically detect the link from your clipboard.\n4. Select your desired format:\n   - Best Video+Audio: Highest quality available.\n   - Audio Only: Converts to MP3 or WAV.\n   - GIF: Creates an animated GIF.\n5. Click 'Download' to start.",
             clipping: "Video Clipping & Cutting",
             clipping_text: "Create viral short clips without downloading the entire video.\n\nHow to use:\n1. Open the 'Add Download' dialog.\n2. Click on 'Clip Range' to expand the options.\n3. Enter the Start Time and End Time in seconds.\n\nExample:\n- Start: 60 (1 minute mark)\n- End: 120 (2 minute mark)\nThis will download ONLY that 1-minute segment.",
             power: "Power User Features",
@@ -225,13 +317,13 @@ export const translations = {
             renaming_text: "Customize how your files are named automatically.\nGo to Settings > Downloads > Filename Template.\n\nAvailable Variables:\n- {title}: Video Title\n- {uploader}: Channel Name\n- {id}: Video ID\n- {ext}: File Extension\n- {width} / {height}: Resolution\n\nRecommended Pattern:\n[{uploader}] {title}.{ext}",
             troubleshoot: "Fix Common Problems",
             ts_fail: "Why does my download fail instantly?",
-            ts_fail_text: "Common Solutions:\n1. Check your Internet Connection.\n2. Update Binaries: Go to Settings > Advanced and verify FFmpeg usage.\n3. Age-Restricted Content: Use the 'System Browser' method to authenticate (Settings > Advanced > Source).",
-            ts_restart: "Why did the app restart?",
-            ts_restart_text: "If you see 'App Restarting' messages, you are likely in Developer Mode and saving files to the source code folder. This triggers a hot-reload. In the final release version, this behavior is disabled.",
+            ts_fail_text: "Common Solutions:\n1. Check your Internet Connection.\n2. Age-Restricted Content: Use the 'System Browser' method to authenticate (Settings > Advanced > Source).\n3. Make sure binaries (yt-dlp, FFmpeg) are properly installed.",
+            ts_restart: "How to Reset the App?",
+            ts_restart_text: "If you experience issues, go to Settings > Advanced and click 'Reset to Defaults' to restore all settings to their original values.",
             auth_guide: "How to download Age-Restricted videos",
             auth_guide_text: "To download age-restricted/premium content:\n1. Log in to YouTube in Chrome or Edge.\n2. In Settings > Advanced > Source, select 'Use System Browser Session'.\n3. The app will borrow your login session for downloads.\n\nNote: Works with Native Download method only.",
             shortcuts: "Keyboard Shortcuts",
-            shortcuts_list: "- **Ctrl + N**: New Download\n- **Ctrl + H**: Open History\n- **Ctrl + ,**: Open Settings\n- **Space**: Pause/Resume Task (if selected)",
+            shortcuts_list: "- **Ctrl + N**: New Download\n- **Ctrl + ,**: Open Settings\n- **F12**: Open DevTools (Debug)\n- **Esc**: Close Dialog",
             replay_tour: "Replay Welcome Tour",
             visual_placeholder: "Visual Demo coming soon",
             sponsorblock: "Auto-Skip Sponsors (SponsorBlock)",
@@ -258,6 +350,10 @@ export const translations = {
       tools: "Alat",
       terminal: "Terminal"
     },
+    error_boundary: {
+        title: "Ada yang salah nih.",
+        reload: "Muat Ulang Aplikasi"
+    },
     status: {
       missing: "Komponen Hilang",
       downloading_bin: "Mengunduh Komponen...",
@@ -277,7 +373,9 @@ export const translations = {
       open_folder: "Buka Folder",
       stop: "Stop",
       clear: "Hapus",
-      empty: "Belum ada unduhan.",
+      empty: "Belum ada unduhan",
+      empty_description: "Tempel link atau tekan Ctrl+N untuk mulai.",
+      plus_more: "+1000 lainnya",
       headers: {
         title_url: "Judul / URL",
         status: "Status",
@@ -316,7 +414,9 @@ export const translations = {
             start_minimized: "Mulai diminimalkan ke Tray",
             close_action: "Tindakan Tombol Tutup",
             minimize_tray: "Minimalkan ke Tray",
-            quit_app: "Keluar Aplikasi"
+            quit_app: "Keluar Aplikasi",
+            low_perf_mode: "Mode Performa Rendah",
+            low_perf_desc: "Matikan semua animasi untuk hemat baterai"
         },
         downloads: {
             storage: "Penyimpanan",
@@ -332,7 +432,8 @@ export const translations = {
             audio: "Hanya Audio",
             metadata_title: "Metadata & Tag",
             embed_metadata: "Sematkan Metadata",
-            embed_thumbnail: "Sematkan Thumbnail"
+            embed_thumbnail: "Sematkan Thumbnail",
+            disable_play_button: "Nonaktifkan Tombol Play"
         },
         network: {
             connection: "Koneksi",
@@ -340,6 +441,18 @@ export const translations = {
             warning_ip: "Peringatan: Terlalu banyak unduhan sekaligus bisa menyebabkan ban IP.",
             speed_limit: "Batas Kecepatan",
             proxy: "URL Proxy",
+            user_agent: "User Agent",
+            concurrent_fragments: "Pecahan Bersamaan",
+            perf_tuning: "Penyetelan Performa:",
+            perf_safe: "1-4 (Aman): Terbaik untuk penggunaan umum dan unduhan stabil.",
+            perf_fast: "5-8 (Cepat): Disarankan untuk koneksi berkecepatan tinggi. Meningkatkan penggunaan CPU.",
+            perf_aggressive: "9-16 (Agresif): Throughput maksimum. Dapat menyebabkan ban IP sementara (429) jika disalahgunakan.",
+            perf_warning: "* Berlaku untuk semua mode unduhan (Video Penuh, Audio, & Potong).",
+             placeholders: {
+                speed: "cth. 5M, 500K",
+                proxy: "http://user:pass@host:port",
+                ua: "Mozilla/5.0..."
+            },
             turbo: "Mode Turbo",
             turbo_desc: "Gunakan enjin muat turun berbilang thread untuk kelajuan maksimum."
         },
@@ -363,7 +476,26 @@ export const translations = {
             danger_desc: "Mengubah lokasi ini dapat merusak aplikasi.",
             redownload_ffmpeg: "Unduh Ulang FFmpeg (Paksa)",
             redownload_help: "Gunakan jika FFmpeg korup atau hilang.",
-            confirm_redownload: "Yakin ingin mengunduh ulang FFmpeg secara paksa?\\n\\nIni akan menimpa ‘ffmpeg.exe’ yang ada dan memakan waktu beberapa menit."
+            confirm_redownload: "Yakin ingin mengunduh ulang FFmpeg secara paksa?\\n\\nIni akan menimpa ‘ffmpeg.exe’ yang ada dan memakan waktu beberapa menit.",
+            developer_tools: "Alat Pengembang",
+            developer_mode: "Mode Pengembang",
+            developer_mode_desc: "Tampilkan detail perintah pada setiap tugas unduhan",
+            data_management: "Manajemen Data",
+            export_history: "Ekspor Riwayat",
+            export_desc: "Simpan riwayat unduhan Anda ke file JSON",
+            export_btn: "Ekspor",
+            import_history: "Impor Riwayat",
+            import_desc: "Pulihkan tugas dari file cadangan",
+            import_btn: "Impor",
+            reset_defaults: "Reset ke Awal",
+            alerts: {
+                export_success: "Riwayat berhasil diekspor!",
+                export_fail: "Gagal mengekspor riwayat: ",
+                import_success: "Berhasil mengimpor {n} tugas!",
+                import_fail: "Gagal mengimpor riwayat: ",
+                invalid_backup: "Format file cadangan tidak valid",
+                confirm_reset: "Anda yakin ingin mereset semua pengaturan ke default?"
+            }
         },
         updater: {
             title: "Pembaruan Perangkat Lunak",
@@ -372,7 +504,15 @@ export const translations = {
             error: "Gagal cek versi.",
             checking: "Memeriksa...",
             update_btn: "Cek Pembaruan",
-            updating: "Memperbarui..."
+            updating: "Memperbarui...",
+            binary_versions: "Versi Binari",
+            check_updates: "Periksa pembaruan dari GitHub",
+            current_ver: "Saat ini",
+            not_checked: "Belum diperiksa",
+            unknown: "Tidak diketahui",
+            update_available: "Pembaruan Tersedia",
+            up_to_date: "Sudah Terbaru",
+            binary_bundled: "Binari dibundel sebagai sidecar. Pembaruan manual diperlukan jika usang."
         },
         setup: {
             title: "Setup Tambahan Diperlukan",
@@ -396,6 +536,13 @@ export const translations = {
             tauri_desc: "Membangun aplikasi yang lebih kecil dan cepat. Menjembatani backend Rust dengan frontend web.",
             lucide_desc: "Ikon yang indah & konsisten. Menambah kejelasan visual dan estetika modern.",
             sb_desc: "Platform crowdsourced untuk melewati segmen sponsor di video YouTube secara otomatis.",
+            role_core: "Mesin Inti",
+            role_media: "Pemrosesan Media",
+            role_framework: "Kerangka Kerja",
+            role_ui: "Pustaka UI",
+            role_icon: "Ikonografi",
+            role_api: "API skipSegments",
+            visit_website: "Kunjungi Situs",
             legal: "Penafian Hukum",
             legal_text: "ClipSceneYT adalah alat untuk penggunaan pribadi (pengarsipan, edukasi). Pengembang tidak berafiliasi dengan YouTube/Google. Segala risiko penggunaan, termasuk pelanggaran hak cipta atau ToS platform, adalah tanggung jawab penuh pengguna.",
             secret_found: "Rahasia Ditemukan!",
@@ -415,6 +562,22 @@ export const translations = {
       sponsor_label: "Hapus Sponsor",
       cancel: "Batal",
       download: "Unduh",
+      remove_sponsors: "Hapus Sponsor",
+      remove_sponsors_desc: "Lewati intro, outro, & iklan dalam video secara otomatis",
+      subtitles_title: "Subtitle",
+      subtitles_desc: "Unduh & sematkan takarir",
+      schedule_download: "Jadwalkan Unduhan",
+      schedule_desc: "Mulai tugas secara otomatis di lain waktu",
+      subtitle_settings: "Pengaturan Subtitle",
+      schedule_time: "Waktu Jadwal",
+      embed_subs: "Sematkan ke file video",
+      estimated_size: "Perkiraan Ukuran",
+      trimmed: "DIPOTONG",
+      pick_date: "Pilih tanggal...",
+      set_time_next: "Atur Waktu Berikutnya",
+      calendar: "Kalender",
+      time: "Waktu",
+      done: "Selesai",
       preview: {
         failed: "Pratinjau Gagal",
         no_data: "Tidak ada data kembali",
@@ -426,10 +589,31 @@ export const translations = {
         audio_wav: "Audio (WAV Lossless)",
         gif: "GIF Animasi"
       },
+      quality_profiles: {
+          highest_quality: "Kualitas Tertinggi",
+          standard: "Standar",
+          ultra_hd: "Ultra HD",
+          qhd: "QHD",
+          full_hd: "Full HD",
+          hd: "HD",
+          data_saver: "Hemat Data"
+      },
+      audio_extraction: {
+          title: "Ekstraksi Audio",
+          desc_auto: "Ekstraksi performa tinggi ke MP3. Bitrate dideteksi dari video sumber.",
+          desc_manual: "Ekstraksi performa tinggi ke MP3. Pilih target kualitas bitrate."
+      },
+      labels: {
+          quality_profile: "Profil Kualitas",
+          fmt: "Fmt:",
+          bitrate_quality: "Kualitas Bitrate"
+      },
       trim_video: "Potong Video",
       metadata_required: "Metadata diperlukan untuk slider",
       time_error: "Waktu mulai harus sebelum waktu selesai",
-      restart: "Mulai Ulang"
+      restart: "Mulai Ulang",
+      filename_label: "Nama File",
+      filename_placeholder: "Nama file kustom (opsional)"
     },
     updater_banner: {
         update_available: "Update yt-dlp tersedia:",
@@ -469,7 +653,7 @@ export const translations = {
         sections: {
             started: "Memulai",
             single: "Cara Download Video",
-            single_text: "1. Salin URL video YouTube yang ingin diunduh.\n2. Klik tombol (+) di pojok kanan atas.\n3. Aplikasi akan otomatis mendeteksi link dari clipboard Anda (Magic Paste).\n4. Pilih format yang diinginkan:\n   - Video Terbaik: Kualitas tertinggi (MP4/WebM).\n   - 360p: Resolusi hemat kuota.\n   - Audio Saja: Konversi ke MP3 atau WAV.\n   - GIF: Membuat animasi GIF pendek.\n5. Klik 'Unduh' untuk memulai proses.",
+            single_text: "1. Salin URL video YouTube yang ingin diunduh.\n2. Klik tombol (+) di pojok kanan atas.\n3. Aplikasi akan otomatis mendeteksi link dari clipboard Anda (Magic Paste).\n4. Pilih format yang diinginkan:\n   - Video Terbaik: Kualitas tertinggi.\n   - Audio Saja: Konversi ke MP3 atau WAV.\n   - GIF: Membuat animasi GIF pendek.\n5. Klik 'Unduh' untuk memulai proses.",
             clipping: "Memotong Video (Clipping)",
             clipping_text: "Buat klip viral pendek tanpa perlu mendownload durasi penuh.\n\nCara Penggunaan:\n1. Buka dialog 'Tambah Unduhan'.\n2. Klik 'Potong Video' (Clip Range) untuk membuka opsi.\n3. Masukkan Waktu Mulai dan Selesai dalam detik.\n4. Klik Unduh.\n\nContoh:\n- Mulai: 60 (menit ke-1)\n- Selesai: 120 (menit ke-2)\nAplikasi hanya akan mengambil potongan 1 menit tersebut.",
             power: "Fitur Power User",
@@ -481,13 +665,13 @@ export const translations = {
             renaming_text: "Atur penamaan file otomatis sesuai selera Anda.\nPergi ke Pengaturan > Unduhan > Template Nama File.\n\nVariabel Tersedia:\n- {title}: Judul Video\n- {uploader}: Nama Channel\n- {id}: ID Video unik\n- {ext}: Ekstensi File\n\nPola Rekomendasi:\n[{uploader}] {title}.{ext}",
             troubleshoot: "Perbaiki Masalah Umum",
             ts_fail: "Kenapa download saya gagal?",
-            ts_fail_text: "Solusi Umum:\n1. Cek koneksi internet Anda.\n2. Update Binary: Pergi ke Pengaturan > Lanjutan dan cek status FFmpeg.\n3. Konten Dewasa/Terbatas: Gunakan metode 'Browser Sistem' untuk otentikasi (Pengaturan > Lanjutan > Sumber).",
-            ts_restart: "Kenapa aplikasi restart sendiri?",
-            ts_restart_text: "Jika muncul pesan 'App Restarting', Anda mungkin sedang dalam Mode Pengembangan (Dev) dan menyimpan file ke folder source code. Ini memicu hot-reload. Di versi Rilis final, perilaku ini dinonaktifkan.",
+            ts_fail_text: "Solusi Umum:\n1. Cek koneksi internet Anda.\n2. Konten Dewasa/Terbatas: Gunakan metode 'Browser Sistem' untuk otentikasi (Pengaturan > Lanjutan > Sumber).\n3. Pastikan binary (yt-dlp, FFmpeg) terinstall dengan benar.",
+            ts_restart: "Cara Reset Aplikasi?",
+            ts_restart_text: "Jika mengalami masalah, buka Pengaturan > Lanjutan dan klik 'Reset to Defaults' untuk mengembalikan semua pengaturan ke nilai awal.",
             auth_guide: "Cara Download Video Dewasa/Premium",
             auth_guide_text: "Untuk mengunduh konten terbatas (umur/premium):\n1. Pastikan Anda sudah login ke YouTube di browser Chrome/Edge.\n2. Di Pengaturan > Lanjutan > Sumber, pilih 'Gunakan Sesi Browser Sistem'.\n3. Aplikasi akan meminjam sesi login dari browser Anda untuk proses unduhan.\n\nCatatan: Fitur ini hanya bekerja dengan metode unduhan Native (SponsorBlock Aktif).",
             shortcuts: "Pintasan Keyboard",
-            shortcuts_list: "- **Ctrl + N**: Unduhan Baru\n- **Ctrl + H**: Buka Riwayat\n- **Ctrl + ,**: Buka Pengaturan\n- **Spasi**: Jeda/Lanjut Tugas",
+            shortcuts_list: "- **Ctrl + N**: Unduhan Baru\n- **Ctrl + ,**: Buka Pengaturan\n- **F12**: Buka DevTools (Debug)\n- **Esc**: Tutup Dialog",
             replay_tour: "Ulangi Tur Sambutan",
             visual_placeholder: "Demo Visual segera hadir",
             sponsorblock: "Lewati Sponsor (SponsorBlock)",
@@ -514,6 +698,10 @@ export const translations = {
       tools: "Alatan",
       terminal: "Terminal"
     },
+    error_boundary: {
+        title: "Ada masalah berlaku.",
+        reload: "Muat Semula Apl"
+    },
     status: {
       missing: "Komponen Hilang",
       downloading_bin: "Sedang Memuat Turun Komponen...",
@@ -533,7 +721,9 @@ export const translations = {
       open_folder: "Buka Folder",
       stop: "Berhenti",
       clear: "Kosongkan",
-      empty: "Tiada muat turun lagi.",
+      empty: "Tiada muat turun lagi",
+      empty_description: "Tampal pautan atau tekan Ctrl+N untuk mula.",
+      plus_more: "+1000 lagi",
       headers: {
         title_url: "Tajuk / URL",
         status: "Status",
@@ -572,7 +762,9 @@ export const translations = {
             start_minimized: "Mula diminimimumkan ke Tray",
             close_action: "Tindakan Butang Tutup",
             minimize_tray: "Minimumkan ke Tray",
-            quit_app: "Keluar Aplikasi"
+            quit_app: "Keluar Aplikasi",
+            low_perf_mode: "Mod Prestasi Rendah",
+            low_perf_desc: "Lumpuhkan semua animasi untuk menjimatkan bateri"
         },
         downloads: {
             storage: "Penyimpanan",
@@ -588,7 +780,8 @@ export const translations = {
             audio: "Audio Sahaja",
             metadata_title: "Metadata & Tag",
             embed_metadata: "Benamkan Metadata",
-            embed_thumbnail: "Benamkan Gambar Kecil"
+            embed_thumbnail: "Benamkan Gambar Kecil",
+            disable_play_button: "Lumpuhkan Butang Main"
         },
         network: {
             connection: "Sambungan",
@@ -596,8 +789,20 @@ export const translations = {
             warning_ip: "Amaran: Terlalu banyak muat turun serentak boleh menyebabkan IP disekat.",
             speed_limit: "Had Kelajuan",
             proxy: "URL Proksi",
+            user_agent: "Ejen Pengguna",
+            concurrent_fragments: "Pecahan Serentak",
+            perf_tuning: "Penalaan Prestasi:",
+            perf_safe: "1-4 (Selamat): Terbaik untuk kegunaan umum dan muat turun stabil.",
+            perf_fast: "5-8 (Pantas): Disyorkan untuk sambungan berkelajuan tinggi. Meningkatkan penggunaan CPU.",
+            perf_aggressive: "9-16 (Agresif): Daya pemprosesan maksimum. Boleh menyebabkan sekatan IP sementara (429) jika disalahgunakan.",
+            perf_warning: "* Terpakai untuk semua mod muat turun (Video Penuh, Audio, & Potong).",
+             placeholders: {
+                speed: "cth. 5M, 500K",
+                proxy: "http://user:pass@host:port",
+                ua: "Mozilla/5.0..."
+            },
             turbo: "Mod Turbo",
-            turbo_desc: "Gunakan enjin muat turun multi-bebenang luaran."
+            turbo_desc: "Gunakan enjin muat turun berbilang thread untuk kelajuan maksimum."
         },
         advanced: {
             auth: "Pengesahan & Kuki",
@@ -619,7 +824,26 @@ export const translations = {
             danger_desc: "Menukar laluan ini boleh merosakkan aplikasi.",
             redownload_ffmpeg: "Muat Turun Semula FFmpeg (Paksa)",
             redownload_help: "Gunakan jika FFmpeg rosak atau hilang.",
-            confirm_redownload: "Anda pasti mahu memuat turun semula FFmpeg?\\n\\nIni akan menimpa ‘ffmpeg.exe’ sedia ada."
+            confirm_redownload: "Anda pasti mahu memuat turun semula FFmpeg?\\n\\nIni akan menimpa ‘ffmpeg.exe’ sedia ada.",
+            developer_tools: "Alatan Pembangun",
+            developer_mode: "Mod Pembangun",
+            developer_mode_desc: "Tunjukkan butiran arahan pada setiap tugasan muat turun",
+            data_management: "Pengurusan Data",
+            export_history: "Eksport Sejarah",
+            export_desc: "Simpan sejarah muat turun anda ke fail JSON",
+            export_btn: "Eksport",
+            import_history: "Import Sejarah",
+            import_desc: "Pulihkan tugasan daripada fail sandaran",
+            import_btn: "Import",
+            reset_defaults: "Tetapkan Semula",
+            alerts: {
+                export_success: "Sejarah berjaya dieksport!",
+                export_fail: "Gagal mengeksport sejarah: ",
+                import_success: "Berjaya mengimport {n} tugasan!",
+                import_fail: "Gagal mengimport sejarah: ",
+                invalid_backup: "Format fail sandaran tidak sah",
+                confirm_reset: "Adakah anda pasti mahu menetapkan semula semua tetapan kepada lalai?"
+            }
         },
         updater: {
             title: "Kemas Kini Perisian",
@@ -628,7 +852,15 @@ export const translations = {
             error: "Semakan versi gagal.",
             checking: "Memeriksa...",
             update_btn: "Semak Kemas Kini",
-            updating: "Sedang Mengemas Kini..."
+            updating: "Sedang Mengemas Kini...",
+            binary_versions: "Versi Binari",
+            check_updates: "Semak kemas kini dari GitHub",
+            current_ver: "Semasa",
+            not_checked: "Belum disemak",
+            unknown: "Tidak diketahui",
+            update_available: "Kemas Kini Tersedia",
+            up_to_date: "Terkini",
+            binary_bundled: "Binari dibundel sebagai sidecar. Kemas kini manual diperlukan jika usang."
         },
         setup: {
             title: "Persiapan Tambahan Diperlukan",
@@ -652,6 +884,13 @@ export const translations = {
             tauri_desc: "Bina aplikasi yang lebih kecil dan pantas. Menghubungkan backend Rust dengan frontend web.",
             lucide_desc: "Ikon yang cantik & konsisten. Menambah kejelasan visual dan estetika moden.",
             sb_desc: "Platform sumber ramai untuk melangkau segmen penaja dalam video YouTube secara automatik.",
+            role_core: "Enjin Teras",
+            role_media: "Pemprosesan Media",
+            role_framework: "Rangka Kerja",
+            role_ui: "UI Library",
+            role_icon: "Ikonografi",
+            role_api: "API skipSegments",
+            visit_website: "Lawati Laman Web",
             legal: "Penafian Undang-undang",
             legal_text: "ClipSceneYT bertujuan untuk kegunaan peribadi sahaja (cth., mengarkib kandungan sendiri, penggunaan adil pendidikan, atau kandungan creative commons). Pembangun tidak bertanggungjawab atas sebarang penyalahgunaan perisian ini atau pelanggaran hak cipta yang dilakukan oleh pengguna. Memuat turun bahan berhak cipta tanpa kebenaran adalah melanggar Syarat Perkhidmatan YouTube.",
             secret_found: "Rahsia Ditemui!",
@@ -671,6 +910,22 @@ export const translations = {
       sponsor_label: "Buang Penaja",
       cancel: "Batal",
       download: "Muat Turun",
+      remove_sponsors: "Buang Penaja",
+      remove_sponsors_desc: "Langkau intro, outro, & iklan dalam video secara automatik",
+      subtitles_title: "Sarikata",
+      subtitles_desc: "Muat turun & benamkan kapsyen",
+      schedule_download: "Jadualkan Muat Turun",
+      schedule_desc: "Mula tugasan secara automatik pada masa akan datang",
+      subtitle_settings: "Tetapan Sarikata",
+      schedule_time: "Masa Jadual",
+      embed_subs: "Benamkan ke dalam fail video",
+      estimated_size: "Anggaran Saiz",
+      trimmed: "DIPOTONG",
+      pick_date: "Pilih tarikh...",
+      set_time_next: "Tetapkan Masa Seterusnya",
+      calendar: "Kalendar",
+      time: "Masa",
+      done: "Selesai",
       preview: {
         failed: "Pratonton Gagal",
         no_data: "Tiada data",
@@ -682,10 +937,31 @@ export const translations = {
         audio_wav: "Audio (WAV Lossless)",
         gif: "GIF Animasi"
       },
+       quality_profiles: {
+          highest_quality: "Kualiti Tertinggi",
+          standard: "Standard",
+          ultra_hd: "Ultra HD",
+          qhd: "QHD",
+          full_hd: "Full HD",
+          hd: "HD",
+          data_saver: "Jimat Data"
+      },
+      audio_extraction: {
+          title: "Pengekstrakan Audio",
+          desc_auto: "Pengekstrakan prestasi tinggi ke MP3. Kadar bit dikesan dari video sumber.",
+          desc_manual: "Pengekstrakan prestasi tinggi ke MP3. Pilih kualiti kadar bit sasaran."
+      },
+      labels: {
+          quality_profile: "Profil Kualiti",
+          fmt: "Fmt:",
+          bitrate_quality: "Kualiti Kadar Bit"
+      },
       trim_video: "Potong Video",
       metadata_required: "Metadata diperlukan untuk peluncur",
       time_error: "Masa mula mesti sebelum masa tamat",
-      restart: "Mula Semula"
+      restart: "Mula Semula",
+      filename_label: "Nama Fail",
+      filename_placeholder: "Nama fail tersuai (pilihan)"
     },
     updater_banner: {
         update_available: "Kemas kini yt-dlp tersedia:",
@@ -743,7 +1019,7 @@ export const translations = {
             auth_guide: "Cara Muat Turun Kandungan Terhad",
             auth_guide_text: "Untuk memuat turun kandungan terhad umur/premium:\n1. Pastikan anda telah log masuk ke YouTube dalam Chrome atau Edge.\n2. Di Tetapan > Lanjutan > Sumber, pilih 'Gunakan Sesi Pelayar Sistem'.\n3. Apl akan meminjam sesi log masuk dari pelayar anda.\n\nNota: Berfungsi dengan kaedah Muat Turun Asli sahaja.",
             shortcuts: "Pintasan Papan Kekunci",
-            shortcuts_list: "- **Ctrl + N**: Muat Turun Baru\n- **Ctrl + H**: Buka Sejarah\n- **Ctrl + ,**: Buka Tetapan\n- **Ruang (Space)**: Jeda/Sambung",
+            shortcuts_list: "- **Ctrl + N**: Muat Turun Baru\n- **Ctrl + ,**: Buka Tetapan\n- **F12**: Buka DevTools (Debug)\n- **Esc**: Tutup Dialog",
             replay_tour: "Ulangi Jelajah Aluan",
             visual_placeholder: "Demo Visual akan datang",
             sponsorblock: "Langkau Penaja (SponsorBlock)",
@@ -769,6 +1045,10 @@ export const translations = {
       settings: "设置",
       tools: "工具",
       terminal: "终端"
+    },
+    error_boundary: {
+        title: "出了点问题。",
+        reload: "重新加载应用"
     },
     status: {
       missing: "缺少组件",
@@ -828,7 +1108,9 @@ export const translations = {
             start_minimized: "启动时最小化到托盘",
             close_action: "关闭按钮行为",
             minimize_tray: "最小化到托盘",
-            quit_app: "退出应用"
+            quit_app: "退出应用",
+            low_perf_mode: "低性能模式",
+            low_perf_desc: "禁用所有动画以节省电量"
         },
         downloads: {
             storage: "存储",
@@ -844,7 +1126,8 @@ export const translations = {
             audio: "仅音频",
             metadata_title: "元数据 & 标签",
             embed_metadata: "嵌入元数据",
-            embed_thumbnail: "嵌入缩略图"
+            embed_thumbnail: "嵌入缩略图",
+            disable_play_button: "禁用播放按钮"
         },
         network: {
             connection: "连接",
@@ -852,6 +1135,18 @@ export const translations = {
             warning_ip: "警告：过多的同时下载可能导致 IP 被封禁。",
             speed_limit: "速度限制",
             proxy: "代理 URL",
+            user_agent: "用户代理 (User Agent)",
+            concurrent_fragments: "并发分片",
+            perf_tuning: "性能调优:",
+            perf_safe: "1-4 (安全): 适合一般用途和稳定下载。",
+            perf_fast: "5-8 (快速): 推荐用于高速连接。增加 CPU 使用率。",
+            perf_aggressive: "9-16 (激进): 最大吞吐量。如果滥用可能会导致暂时性 IP 封禁 (429 Too Many Requests)。",
+            perf_warning: "* 适用于所有下载模式（完整视频、音频和剪辑）。",
+             placeholders: {
+                speed: "例如 5M, 500K",
+                proxy: "http://user:pass@host:port",
+                ua: "Mozilla/5.0..."
+            },
             turbo: "极速模式",
             turbo_desc: "使用多线程下载引擎以获得最大速度。"
         },
@@ -875,7 +1170,26 @@ export const translations = {
             danger_desc: "更改这些路径可能会导致应用损坏。",
             redownload_ffmpeg: "重新下载 FFmpeg (强制)",
             redownload_help: "如果是 FFmpeg 损坏或缺少依赖项，请使用此功能。",
-            confirm_redownload: "确定要强制重新下载 FFmpeg 吗？\\n\\n这将覆盖现有的 ‘ffmpeg.exe’，可能需要几分钟时间。"
+            confirm_redownload: "确定要强制重新下载 FFmpeg 吗？\\n\\n这将覆盖现有的 ‘ffmpeg.exe’，可能需要几分钟时间。",
+            developer_tools: "开发者工具",
+            developer_mode: "开发者模式",
+            developer_mode_desc: "在每个下载任务上显示详细命令",
+            data_management: "数据管理",
+            export_history: "导出历史",
+            export_desc: "将下载历史保存到 JSON 文件",
+            export_btn: "导出",
+            import_history: "导入历史",
+            import_desc: "从备份文件恢复任务",
+            import_btn: "导入",
+            reset_defaults: "重置为默认值",
+            alerts: {
+                export_success: "历史记录导出成功！",
+                export_fail: "导出历史记录失败：",
+                import_success: "成功导入 {n} 个任务！",
+                import_fail: "导入历史记录失败：",
+                invalid_backup: "无效的备份文件格式",
+                confirm_reset: "您确定要将所有设置重置为默认值吗？"
+            }
         },
         updater: {
             title: "软件更新",
@@ -884,7 +1198,15 @@ export const translations = {
             error: "版本检查失败。",
             checking: "检查中...",
             update_btn: "检查更新",
-            updating: "更新中..."
+            updating: "更新中...",
+            binary_versions: "二进制版本",
+            check_updates: "从 GitHub 检查更新",
+            current_ver: "当前",
+            not_checked: "未检查",
+            unknown: "未知",
+            update_available: "有可用更新",
+            up_to_date: "已是最新",
+            binary_bundled: "二进制文件作为 sidecar 捆绑。如果过时需要手动更新。"
         },
         setup: {
             title: "需额外设置",
@@ -908,13 +1230,20 @@ export const translations = {
             tauri_desc: "构建更小、更快、更清晰的应用程序。连接 Rust 后端与 Web 前端。",
             lucide_desc: "美观且一致的图标。为界面增添视觉清晰度和现代美感。",
             sb_desc: "一个众包平台，可自动跳过 YouTube 视频中的赞助片段。",
+            role_core: "核心引擎",
+            role_media: "媒体处理",
+            role_framework: "框架",
+            role_ui: "UI 库",
+            role_icon: "图标",
+            role_api: "跳过片段 API",
+            visit_website: "访问网站",
             legal: "法律免责声明",
             legal_text: "ClipSceneYT 仅供个人使用（存档、教育）。开发者与 YouTube/Google 无关。所有使用风险（包括侵犯版权或违反平台服务条款）均由用户自行承担。",
             secret_found: "发现秘密！",
             secret_desc: "您解锁了秘密开发者感谢徽章！",
             secret_sub: "（没有隐藏设置，纯粹为了好玩！）",
             awesome: "太棒了！"
-        }
+        },
     },
     dialog: {
       title: "添加下载",
@@ -927,6 +1256,22 @@ export const translations = {
       sponsor_label: "跳过赞助片段",
       cancel: "取消",
       download: "开始下载",
+      remove_sponsors: "移除赞助",
+      remove_sponsors_desc: "自动跳过视频中的片头、片尾和广告",
+      subtitles_title: "字幕",
+      subtitles_desc: "下载并嵌入字幕",
+      schedule_download: "计划下载",
+      schedule_desc: "在稍后时间自动开始任务",
+      subtitle_settings: "字幕设置",
+      schedule_time: "计划时间",
+      embed_subs: "嵌入到视频文件",
+      estimated_size: "预计大小",
+      trimmed: "已剪辑",
+      pick_date: "选择日期...",
+      set_time_next: "下一步设置时间",
+      calendar: "日历",
+      time: "时间",
+      done: "完成",
       preview: {
         failed: "预览失败",
         no_data: "无数据",
@@ -938,10 +1283,31 @@ export const translations = {
         audio_wav: "音频 (WAV 无损)",
         gif: "动画 GIF（动图）"
       },
+      quality_profiles: {
+          highest_quality: "最高质量",
+          standard: "标准",
+          ultra_hd: "超高清 (UHD)",
+          qhd: "2K (QHD)",
+          full_hd: "全高清 (FHD)",
+          hd: "高清 (HD)",
+          data_saver: "省流模式"
+      },
+      audio_extraction: {
+          title: "音频提取",
+          desc_auto: "高性能提取为 MP3。从源视频检测比特率。",
+          desc_manual: "高性能提取为 MP3。选择目标比特率质量。"
+      },
+      labels: {
+          quality_profile: "画质配置",
+          fmt: "格式:",
+          bitrate_quality: "比特率质量"
+      },
       trim_video: "裁剪视频",
       metadata_required: "滑块需要元数据",
       time_error: "开始时间必须在结束时间之前",
-      restart: "重新开始"
+      restart: "重新开始",
+      filename_label: "文件名",
+      filename_placeholder: "自定义文件名（可选）"
     },
     updater_banner: {
         update_available: "yt-dlp 更新可用：",
@@ -999,7 +1365,7 @@ export const translations = {
             auth_guide: "如何下载年龄限制视频",
             auth_guide_text: "要下载年龄限制/会员内容：\n1. 请确保您已在 Chrome 或 Edge 浏览器中登录 YouTube。\n2. 在设置 > 高级 > 来源中，选择“使用系统浏览器会话”。\n3. 应用程序将借用您的浏览器登录会话进行下载。\n\n注意：仅适用于原生下载模式。",
             shortcuts: "键盘快捷键",
-            shortcuts_list: "- **Ctrl + N**: 新建下载\n- **Ctrl + H**: 打开历史\n- **Ctrl + ,**: 打开设置\n- **空格**: 暂停/继续任务",
+            shortcuts_list: "- **Ctrl + N**: 新建下载\n- **Ctrl + ,**: 打开设置\n- **F12**: 打开开发工具 (调试)\n- **Esc**: 关闭对话框",
             replay_tour: "重播欢迎向导",
             visual_placeholder: "视觉演示即将推出",
             sponsorblock: "自动跳过赞助 (SponsorBlock)",
@@ -1017,5 +1383,5 @@ export const translations = {
             screenshot: "截图",
             more_soon: "更多功能即将推出..."
         }
-  }
+    }
 }

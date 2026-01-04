@@ -66,7 +66,7 @@ async function runCommand(command, args, cwd = OUTPUT_DIR) {
     return new Promise((resolve) => {
         const start = Date.now();
         console.log(`> Running: ${path.basename(command)} ${args.join(" ")}`);
-        
+
         const proc = spawn(command, args, { cwd });
         let stdout = "";
         let stderr = "";
@@ -83,7 +83,7 @@ async function runCommand(command, args, cwd = OUTPUT_DIR) {
                 stderr
             });
         });
-        
+
         proc.on("error", (err) => {
              resolve({ code: -1, duration: 0, stdout: "", stderr: err.message });
         });
@@ -123,7 +123,7 @@ async function runSpeedTest(useAria2 = false, threads = 16) {
     }
 
     const result = await runCommand(YTDLP_PATH, args);
-    
+
     if (result.code !== 0) {
         console.error(`FAILED: Exit code ${result.code}`);
         return null;
@@ -136,12 +136,12 @@ async function runSpeedTest(useAria2 = false, threads = 16) {
     } catch(e) {}
 
     const speedMbps = (size * 8 / (result.duration * 1000 * 1000)).toFixed(2);
-    
+
     console.log(`RESULT:`);
     console.log(`  Duration: ${result.duration.toFixed(2)}s`);
     console.log(`  Size: ${formatBytes(size)}`);
     console.log(`  Avg Speed: ${speedMbps} Mbps`);
-    
+
     return {
         mode: label,
         duration: result.duration,
@@ -157,7 +157,7 @@ async function runFfmpegTest() {
         console.log("SKIP: ffmpeg missing.");
         return;
     }
-    
+
     // We need a source file first. Use one from speed test if available, or download small one.
     const sourceFile = path.join(OUTPUT_DIR, "speed_test_native.mp4");
     if (!fs.existsSync(sourceFile)) {
@@ -168,7 +168,7 @@ async function runFfmpegTest() {
     // 1. Cut 10 times
     console.log("Running 5 sequential cuts...");
     const starts = [10, 20, 30, 40, 50];
-    
+
     for (let i = 0; i < starts.length; i++) {
         const start = starts[i];
         const outfile = `cut_${i}.mp4`;
@@ -181,7 +181,7 @@ async function runFfmpegTest() {
             "-c", "copy",
             outfile
         ];
-        
+
         const res = await runCommand(FFMPEG_PATH, args);
         if (res.code === 0) console.log(`  Cut ${i+1}: OK (${res.duration.toFixed(2)}s)`);
         else console.log(`  Cut ${i+1}: FAIL`);
@@ -196,7 +196,7 @@ async function runRobustness() {
     // Just dry run to check format extraction, not full download to save time/bandwidth
     // or download small audio.
     const args = [
-        TEST_URL, 
+        TEST_URL,
         "-F", // List formats
     ];
     const res = await runCommand(YTDLP_PATH, args);
@@ -260,7 +260,7 @@ async function runErrorHandling() {
 
     console.log("\n=== BENCHMARK COMPLETE ===");
     console.log(JSON.stringify(report, null, 2));
-    
+
     // Save report
     fs.writeFileSync(path.join(OUTPUT_DIR, "benchmark_report.json"), JSON.stringify(report, null, 2));
 })();

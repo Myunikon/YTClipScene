@@ -13,9 +13,11 @@ import { ClipboardListener } from './components/ClipboardListener'
 import { SettingsView } from './components/SettingsView'
 import { DownloadsView } from './components/DownloadsView'
 import { GuideModal, GuideModalRef } from './components/GuideModal'
+import { ShortcutsPopover } from './components/ShortcutsPopover'
 import { AppHeader } from './components/layout/AppHeader'
 import { AppLayout } from './components/layout/AppLayout'
 import { ContextMenu } from './components/ContextMenu'
+import { StatusBar } from './components/StatusBar'
 
 type ViewState = 'downloads' | 'settings' | 'history'
 
@@ -24,6 +26,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<ViewState>('downloads')
   const [clipboardUrl, setClipboardUrl] = useState('')
   const [previewLang, setPreviewLang] = useState<string | null>(null)
+  const [showShortcuts, setShowShortcuts] = useState(false)
   
   // Dialog Refs
   const addDialogRef = useRef<any>(null)
@@ -56,6 +59,29 @@ function App() {
           document.body.classList.remove('low-perf-mode')
       }
   }, [settings.lowPerformanceMode])
+
+  // Scheduler Logic: Check every 10s
+  useEffect(() => {
+      const interval = setInterval(() => {
+          const { tasks, updateTask, processQueue } = useAppStore.getState()
+          const now = Date.now()
+          
+          let needsProcessing = false
+          tasks.forEach(task => {
+              if (task.status === 'scheduled' && task.scheduledTime && task.scheduledTime <= now) {
+                  // Time to run!
+                  updateTask(task.id, { status: 'pending', scheduledTime: undefined, log: 'Scheduled start triggered' })
+                  needsProcessing = true
+              }
+          })
+          
+          if (needsProcessing) {
+              processQueue()
+          }
+      }, 10000) 
+      
+      return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false)
@@ -187,6 +213,45 @@ function App() {
   }, [])
 
   /* -------------------------------------------------------------------------- */
+  /* DEEP LINK LISTENER (clipscene://)                                           */
+  /* -------------------------------------------------------------------------- */
+  useEffect(() => {
+    let unlisten: Promise<() => void> | undefined;
+
+    const setupListener = async () => {
+        try {
+            const { onOpenUrl } = await import('@tauri-apps/plugin-deep-link')
+            unlisten = onOpenUrl((urls) => {
+                console.log('Deep link received:', urls)
+                for (const url of urls) {
+                    try {
+                        // Support both clipscene://download?url=... and just raw clipscene://...
+                        const urlObj = new URL(url)
+                        const targetUrl = urlObj.searchParams.get('url')
+                        
+                        if (targetUrl) {
+                            setClipboardUrl(targetUrl)
+                            // Small delay to ensure state updates
+                            setTimeout(() => openDialog(), 100)
+                        }
+                    } catch (e) {
+                        console.error('Failed to parse deep link:', e)
+                    }
+                }
+            })
+        } catch (e) {
+            console.error('Deep link plugin not initialized', e)
+        }
+    }
+    
+    setupListener()
+    
+    return () => {
+        if (unlisten) unlisten.then(f => f())
+    }
+  }, [])
+
+  /* -------------------------------------------------------------------------- */
   /* THEME TOGGLE (With View Transition)                                        */
   /* -------------------------------------------------------------------------- */
   const toggleTheme = async () => {
@@ -220,10 +285,14 @@ function App() {
         <AppHeader 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
-            t={t} 
+            t={t as any} 
             openDialog={openDialog}
-            onOpenGuide={() => guideModalRef.current?.showModal()} 
+            onOpenGuide={() => guideModalRef.current?.showModal()}
+            onOpenShortcuts={() => setShowShortcuts(true)}
         />
+        
+        {/* Shortcuts Popover */}
+        <ShortcutsPopover isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
 
         {/* MAIN CONTENT */}
         <div className="flex-1 overflow-hidden relative flex flex-col">
@@ -290,6 +359,7 @@ function App() {
             onClose={() => setContextMenu(c => ({ ...c, visible: false }))}
        />
        
+       <StatusBar />
        <Toaster position="bottom-right" theme={theme as any} richColors />
     </AppLayout>
     </MotionConfig>

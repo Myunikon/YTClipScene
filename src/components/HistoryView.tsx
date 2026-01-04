@@ -1,9 +1,11 @@
-import { memo, useCallback, useMemo } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useAppStore, DownloadTask } from '../store'
 import { translations } from '../lib/locales'
 import { FolderOpen, Play, Trash2, FileVideo } from 'lucide-react'
 import { openPath } from '@tauri-apps/plugin-opener'
+import { Terminal } from 'lucide-react'
+import { CommandModal } from './CommandModal'
 
 // --- Types & Props ---
 
@@ -13,12 +15,15 @@ interface HistoryRowProps {
     onOpenFolder: (path: string) => void
     onPlayFile: (path: string) => void
     onRemove: (id: string) => void
+    onViewCommand: (task: DownloadTask) => void
     style: React.CSSProperties
+    showPlayButton: boolean
+    showCommandButton: boolean
 }
 
 // --- Memoized Row Component ---
 
-const HistoryRow = memo(({ style, task, language, onOpenFolder, onPlayFile, onRemove }: HistoryRowProps) => {
+const HistoryRow = memo(({ style, task, language, onOpenFolder, onPlayFile, onRemove, onViewCommand, showPlayButton, showCommandButton }: HistoryRowProps) => {
     // Safety check for empty task (ghost row)
     if (!task) return null
 
@@ -57,6 +62,16 @@ const HistoryRow = memo(({ style, task, language, onOpenFolder, onPlayFile, onRe
             >
                 <FolderOpen className="w-4 h-4" />
             </button>
+            {showCommandButton && (
+                <button 
+                    onClick={() => onViewCommand(task)}
+                    className="p-1.5 text-muted-foreground hover:text-purple-500 hover:bg-purple-500/10 rounded-md transition-colors"
+                    title="View Command Details"
+                >
+                    <Terminal className="w-4 h-4" />
+                </button>
+            )}
+            {showPlayButton && (
             <button 
                 disabled={!isFileAvailable}
                 onClick={() => task.filePath && onPlayFile(task.filePath)}
@@ -65,6 +80,7 @@ const HistoryRow = memo(({ style, task, language, onOpenFolder, onPlayFile, onRe
             >
                 <Play className="w-4 h-4" />
             </button>
+            )}
             <button 
                 onClick={() => onRemove(task.id)}
                 className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors ml-2"
@@ -140,6 +156,15 @@ export function HistoryView() {
       clearTask(id)
   }, [clearTask])
 
+  // Command Modal State
+  const [selectedTask, setSelectedTask] = useState<DownloadTask | null>(null)
+  const [isCommandOpen, setIsCommandOpen] = useState(false)
+
+  const handleViewCommand = useCallback((task: DownloadTask) => {
+      setSelectedTask(task)
+      setIsCommandOpen(true)
+  }, [])
+
   if (historyTasks.length === 0) {
       return (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 animate-in fade-in duration-500">
@@ -184,10 +209,22 @@ export function HistoryView() {
                         onOpenFolder={handleOpenFolder}
                         onPlayFile={handlePlayFile}
                         onRemove={handleRemove}
+                        onViewCommand={handleViewCommand}
                         style={{}} // No specific style needed for non-virtualized
+                        showPlayButton={!settings.disablePlayButton}
+                        showCommandButton={settings.developerMode}
                     />
                 ))}
             </div>
+            
+            {/* Command Modal */}
+            {selectedTask && (
+                <CommandModal 
+                    task={selectedTask}
+                    isOpen={isCommandOpen}
+                    onClose={() => setIsCommandOpen(false)}
+                />
+            )}
         </div>
     </div>
   )

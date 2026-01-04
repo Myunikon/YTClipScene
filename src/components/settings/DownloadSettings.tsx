@@ -32,7 +32,7 @@ export function DownloadSettings({ settings, setSetting, t }: DownloadSettingsPr
                     <span>{t.settings.downloads.always_ask}</span>
                 </label>
 
-                <div className="pt-2 flex gap-6">
+                <div className="pt-2 flex flex-wrap gap-6">
                     <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-secondary/30 rounded-lg transition-colors">
                         <Switch checked={settings.embedMetadata} onCheckedChange={val => setSetting('embedMetadata', val)} />
                         <span>{t.settings.downloads.embed_metadata}</span>
@@ -40,6 +40,10 @@ export function DownloadSettings({ settings, setSetting, t }: DownloadSettingsPr
                     <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-secondary/30 rounded-lg transition-colors">
                         <Switch checked={settings.embedThumbnail} onCheckedChange={val => setSetting('embedThumbnail', val)} />
                         <span>{t.settings.downloads.embed_thumbnail}</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-secondary/30 rounded-lg transition-colors">
+                        <Switch checked={settings.disablePlayButton} onCheckedChange={val => setSetting('disablePlayButton', val)} />
+                        <span>{t.settings.downloads.disable_play_button || 'Disable Play Button'}</span>
                     </label>
                 </div>
             </section>

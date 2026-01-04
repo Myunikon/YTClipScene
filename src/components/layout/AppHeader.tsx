@@ -1,4 +1,4 @@
-import { Download, FolderOpen, Settings, HelpCircle, Plus } from 'lucide-react'
+import { Download, FolderOpen, Settings, HelpCircle, Plus, Keyboard } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../../lib/utils'
 import { translations } from '../../lib/locales'
@@ -11,11 +11,12 @@ interface AppHeaderProps {
   t: Translations
   openDialog: () => void
   onOpenGuide: () => void
+  onOpenShortcuts: () => void
 }
 
-export function AppHeader({ activeTab, setActiveTab, t, openDialog, onOpenGuide }: AppHeaderProps) {
+export function AppHeader({ activeTab, setActiveTab, t, openDialog, onOpenGuide, onOpenShortcuts }: AppHeaderProps) {
   return (
-    <header className="h-16 border-b border-border/50 bg-background/80 backdrop-blur-xl shrink-0 flex items-center justify-between px-6 z-50">
+    <header className="relative h-16 border-b border-border/50 bg-background/80 backdrop-blur-xl shrink-0 flex items-center justify-between px-6 z-50">
         <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-lg shadow-lg shadow-primary/20 flex items-center justify-center">
                 <Download className="w-5 h-5 text-white" />
@@ -23,7 +24,7 @@ export function AppHeader({ activeTab, setActiveTab, t, openDialog, onOpenGuide 
             <h1 className="font-bold text-lg tracking-tight hidden sm:block">ClipScene<span className="text-primary">YT</span></h1>
         </div>
 
-        <nav className="flex items-center bg-secondary/50 rounded-full p-1 border">
+        <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-secondary/50 rounded-full p-1 border">
         {[
             { id: 'downloads', label: t.nav.downloads, icon: Download },
             { id: 'history', label: t.history.title, icon: FolderOpen },
@@ -45,15 +46,22 @@ export function AppHeader({ activeTab, setActiveTab, t, openDialog, onOpenGuide 
                     />
                 )}
                 <tab.icon className="w-3 h-3 sm:w-4 sm:h-4 z-10 relative" /> 
-                <span className="relative z-10">{tab.label}</span>
+                <span className="relative z-10 hidden lg:inline">{tab.label}</span>
             </button>
         ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+            <button 
+            onClick={onOpenShortcuts}
+            className="p-2 hover:bg-secondary rounded-full text-muted-foreground hover:text-foreground transition-colors"
+            title={t.guide?.sections?.shortcuts || 'Keyboard Shortcuts'}
+            >
+            <Keyboard className="w-5 h-5" />
+            </button>
             <button 
             onClick={onOpenGuide}
-            className="p-2 hover:bg-secondary rounded-full text-muted-foreground hover:text-foreground transition-colors mr-2"
+            className="p-2 hover:bg-secondary rounded-full text-muted-foreground hover:text-foreground transition-colors"
             title={t.guide.title}
             >
             <HelpCircle className="w-5 h-5" />

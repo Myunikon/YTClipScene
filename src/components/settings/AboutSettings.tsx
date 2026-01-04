@@ -59,10 +59,10 @@ export function AboutSettings({ t, addLog, setShowEasterEgg }: AboutSettingsProp
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {[
-                        { id: 'yt-dlp', name: 'yt-dlp', role: 'Core Engine', Icon: TerminalIcon, desc: t.settings.about_page.yt_desc, link: 'https://github.com/yt-dlp/yt-dlp', color: 'text-foreground', bg: 'bg-black/10 dark:bg-white/10' },
-                        { id: 'ffmpeg', name: 'FFmpeg', role: 'Media Processing', Icon: Scissors, desc: t.settings.about_page.ff_desc, link: 'https://ffmpeg.org', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-500/10' },
-                        { id: 'tauri', name: 'Tauri', role: 'Framework', Icon: Zap, desc: t.settings.about_page.tauri_desc, link: 'https://tauri.app', color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-500/10' },
-                        { id: 'react', name: 'React', role: 'UI Library', Icon: (props:any) => (
+                        { id: 'yt-dlp', name: 'yt-dlp', role: t.settings.about_page.role_core, Icon: TerminalIcon, desc: t.settings.about_page.yt_desc, link: 'https://github.com/yt-dlp/yt-dlp', color: 'text-foreground', bg: 'bg-black/10 dark:bg-white/10' },
+                        { id: 'ffmpeg', name: 'FFmpeg', role: t.settings.about_page.role_media, Icon: Scissors, desc: t.settings.about_page.ff_desc, link: 'https://ffmpeg.org', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-500/10' },
+                        { id: 'tauri', name: 'Tauri', role: t.settings.about_page.role_framework, Icon: Zap, desc: t.settings.about_page.tauri_desc, link: 'https://tauri.app', color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-500/10' },
+                        { id: 'react', name: 'React', role: t.settings.about_page.role_ui, Icon: (props:any) => (
                             <svg className={`w-6 h-6 ${props.className}`} viewBox="-11.5 -10.23174 23 20.46348">
                                 <circle cx="0" cy="0" r="2.05" fill="currentColor"/>
                                 <g stroke="currentColor" strokeWidth="1" fill="none">
@@ -72,8 +72,8 @@ export function AboutSettings({ t, addLog, setShowEasterEgg }: AboutSettingsProp
                                 </g>
                             </svg>
                         ), desc: t.settings.about_page.react_desc, link: 'https://react.dev', color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-                        { id: 'lucide', name: 'Lucide', role: 'Iconography', Icon: Globe, desc: t.settings.about_page.lucide_desc, link: 'https://lucide.dev', color: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-500/10' },
-                        { id: 'sponsorblock', name: 'SponsorBlock', role: 'skipSegments API', Icon: AlertCircle, desc: t.settings.about_page.sb_desc, link: 'https://sponsor.ajay.app', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' },
+                        { id: 'lucide', name: 'Lucide', role: t.settings.about_page.role_icon, Icon: Globe, desc: t.settings.about_page.lucide_desc, link: 'https://lucide.dev', color: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-500/10' },
+                        { id: 'sponsorblock', name: 'SponsorBlock', role: t.settings.about_page.role_api, Icon: AlertCircle, desc: t.settings.about_page.sb_desc, link: 'https://sponsor.ajay.app', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' },
                     ].map((item) => (
                         <motion.div 
                             key={item.id}
@@ -135,7 +135,7 @@ export function AboutSettings({ t, addLog, setShowEasterEgg }: AboutSettingsProp
                                     className="w-full bg-primary text-primary-foreground font-bold py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-sm mt-2"
                                 >
                                     <ExternalLink className="w-4 h-4" />
-                                    Visit Website
+                                    {t.settings.about_page.visit_website}
                                 </button>
                             </div>
                         </motion.div>

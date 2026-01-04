@@ -61,8 +61,8 @@ export function GeneralSettings({ settings, setSetting, toggleTheme, t }: Genera
                 <div className="pt-2 border-t border-border/50">
                     <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-secondary/30 rounded-lg transition-colors">
                         <div className="flex flex-col">
-                            <span className="text-sm font-medium">Low Performance Mode</span>
-                            <span className="text-xs text-muted-foreground">Disable all animations to save battery</span>
+                            <span className="text-sm font-medium">{t.settings.general.low_perf_mode}</span>
+                            <span className="text-xs text-muted-foreground">{t.settings.general.low_perf_desc}</span>
                         </div>
                         <Switch checked={settings.lowPerformanceMode} onCheckedChange={val => setSetting('lowPerformanceMode', val)} />
                     </label>

@@ -22,6 +22,10 @@ export async function buildYtDlpArgs(
         '--no-playlist',
         // CONCURRENT FRAGMENTS (Speed Boost)
         '-N', String(settings.concurrentFragments || 4),
+        '--continue', // Force resume support
+        // ANTI-THROTTLE: Emulate Android client which often has fewer speed restrictions
+        '--extractor-args', 'youtube:player_client=android',
+        '--socket-timeout', '30', // Refresh link if connection hangs/throttles for 30s
     ]
 
     const fmt = options.format || settings.resolution
@@ -29,14 +33,39 @@ export async function buildYtDlpArgs(
 
     if (fmt === 'audio') {
         args.push('-x', '--audio-format', 'mp3')
+        // Audio quality: 0 = best, 10 = worst. Convert kbps to quality level
+        // 320K = ~0, 256K = ~1, 192K = ~2, 128K = ~5, 64K = ~9
+        const bitrate = (options as any).audioBitrate || '192'
+        const qualityMap: Record<string, string> = {
+            '320': '0', '256': '1', '192': '2', '160': '3', '128': '5', '96': '7', '64': '9'
+        }
+        args.push('--audio-quality', qualityMap[bitrate] || '2')
     } else {
         let h = ''
         if (fmt !== 'Best' && fmt !== 'audio') {
             // If explicit resolution (360, 720, 1080, etc)
             h = `[height<=${fmt}]`
         }
-        // Download best video+audio matching height, or just best.
-        args.push('-f', `bestvideo${h}+bestaudio/best${h}/best`)
+
+        // Codec Logic
+        const codec = (options as any).videoCodec || 'auto'
+        let formatString = ''
+
+        if (codec === 'h264') {
+            // Force AVC/H.264 (Maximum Compatibility)
+            formatString = `bestvideo${h}[vcodec^=avc]+bestaudio[ext=m4a]/best${h}[ext=mp4]/best`
+        } else if (codec === 'av1') {
+            // Prefer AV1 (High Efficiency)
+            formatString = `bestvideo${h}[vcodec^=av01]+bestaudio/bestvideo${h}[vcodec^=vp9]+bestaudio/best`
+        } else if (codec === 'vp9') {
+            // Prefer VP9
+            formatString = `bestvideo${h}[vcodec^=vp9]+bestaudio/best`
+        } else {
+            // Auto / Best (Default)
+            formatString = `bestvideo${h}+bestaudio/best${h}/best`
+        }
+
+        args.push('-f', formatString)
         
         // MAGIC REMUX: Ensure output is always the desired container (mp4/mkv)
         args.push('--merge-output-format', container) 
@@ -63,7 +92,27 @@ export async function buildYtDlpArgs(
         args.push('--postprocessor-args', 'ffmpeg:-movflags +faststart -avoid_negative_ts make_zero -map_metadata 0')
     }
 
-    if (settings.useSponsorBlock && settings.sponsorSegments.length > 0) {
+    // Subtitle download support
+    if ((options as any).subtitles) {
+        const lang = (options as any).subtitleLang || 'en'
+        const embedSubs = (options as any).embedSubtitles
+        
+        if (lang === 'all') {
+            args.push('--write-subs', '--all-subs')
+        } else if (lang === 'auto') {
+            args.push('--write-auto-subs', '--sub-langs', 'en')
+        } else {
+            args.push('--write-subs', '--sub-langs', lang)
+        }
+        
+        if (embedSubs && fmt !== 'audio') {
+            args.push('--embed-subs')
+        }
+    }
+
+    // SponsorBlock: Check BOTH per-task option (from dialog) and global setting
+    const useSponsorBlockNow = (options as any).removeSponsors || settings.useSponsorBlock
+    if (useSponsorBlockNow && settings.sponsorSegments.length > 0) {
         args.push('--sponsorblock-remove', settings.sponsorSegments.join(','))
     }
 
@@ -215,16 +264,55 @@ export function parseYtDlpJson(stdout: string) {
         }
     }
 
-    if (parsedData) return parsedData
+    if (parsedData) {
+        // Robust Extraction Logic
+        
+        // 1. Thumbnail Fallback
+        if (!parsedData.thumbnail && parsedData.thumbnails && Array.isArray(parsedData.thumbnails) && parsedData.thumbnails.length > 0) {
+            // Pick the last one (usually highest quality in yt-dlp output)
+            parsedData.thumbnail = parsedData.thumbnails[parsedData.thumbnails.length - 1].url
+        }
+
+        // 2. Playlist/Entries Fallback
+        if (!parsedData.title && parsedData.entries && Array.isArray(parsedData.entries) && parsedData.entries.length > 0) {
+            const firstEntry = parsedData.entries[0]
+            parsedData.title = parsedData.title || firstEntry.title
+            
+            if (!parsedData.thumbnail) {
+                parsedData.thumbnail = firstEntry.thumbnail
+                if (!parsedData.thumbnail && firstEntry.thumbnails && Array.isArray(firstEntry.thumbnails)) {
+                     parsedData.thumbnail = firstEntry.thumbnails[firstEntry.thumbnails.length - 1].url
+                }
+            }
+        }
+        
+        return parsedData
+    }
     
     // Fallback: Try finding substring if single line messed up
     const firstBrace = stdout.indexOf('{')
     if (firstBrace !== -1) {
         try {
             const potentialJson = stdout.substring(firstBrace)
-            return JSON.parse(potentialJson)
+            const data = JSON.parse(potentialJson)
+            // Apply same robustness
+             if (!data.thumbnail && data.thumbnails && Array.isArray(data.thumbnails)) {
+                data.thumbnail = data.thumbnails[data.thumbnails.length - 1].url
+            }
+            return data
         } catch (e) { /* ignore */ }
     }
     
     throw new Error("Invalid JSON output from yt-dlp")
+}
+// Clear local cache command
+export async function clearCache() {
+    try {
+        const cmd = await getYtDlpCommand(['--rm-cache-dir'])
+        const output = await cmd.execute()
+        if (output.code !== 0) throw new Error(output.stderr)
+        return true
+    } catch (e) {
+        throw e
+    }
 }

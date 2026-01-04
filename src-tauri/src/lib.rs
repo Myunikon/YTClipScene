@@ -21,12 +21,14 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_deep_link::init())
         .invoke_handler(tauri::generate_handler![
             commands::system::perform_system_action,
             commands::system::check_gpu_support,
             commands::system::set_window_effects,
             commands::process::suspend_process,
             commands::process::resume_process,
+            commands::stats::get_system_stats,
         ])
         .setup(|app| {
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -55,6 +57,13 @@ pub fn run() {
             } else {
                 tray_builder.build(app)?
             };
+
+            // DEEP LINK REGISTRATION (Runtime)
+            #[cfg(any(windows, target_os = "linux"))]
+            {
+                use tauri_plugin_deep_link::DeepLinkExt;
+                app.deep_link().register("clipscene")?;
+            }
 
             // WINDOW VIBRANCY (Transparency) - Default to ON at startup
             #[cfg(target_os = "windows")]

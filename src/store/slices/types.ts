@@ -6,13 +6,20 @@ export interface DownloadOptions {
   container?: string
   sponsorBlock?: boolean
   turbo?: boolean
+  customFilename?: string // User-defined filename (without extension)
+  audioBitrate?: string // Audio quality in kbps (128, 192, 320)
+  subtitles?: boolean // Download subtitles
+  subtitleLang?: string // Subtitle language (en, id, auto, all)
+  embedSubtitles?: boolean // Embed subtitles into video
+  videoCodec?: 'auto' | 'av1' | 'h264' | 'vp9' // Codec Preference
+  scheduledTime?: number // Timestamp
 }
 
 export interface DownloadTask {
   id: string
   url: string
   title: string
-  status: 'pending' | 'fetching_info' | 'downloading' | 'completed' | 'error' | 'stopped' | 'paused'
+  status: 'pending' | 'fetching_info' | 'downloading' | 'completed' | 'error' | 'stopped' | 'paused' | 'scheduled'
   progress: number
   speed: string
   eta: string
@@ -21,6 +28,8 @@ export interface DownloadTask {
   log?: string
   path?: string // Save folder
   filePath?: string // Full path to file
+  concurrentFragments?: number // Number of parallel chunks used
+  scheduledTime?: number // Timestamp for scheduled start
   _options?: DownloadOptions
   // Developer Mode: Command details
   ytdlpCommand?: string
@@ -65,6 +74,7 @@ export interface AppSettings {
   embedThumbnail: boolean
   postDownloadAction: 'none' | 'sleep' | 'shutdown'
   developerMode: boolean
+  disablePlayButton: boolean // Hide play button in History view
 }
 
 export interface UISlice {
@@ -101,14 +111,20 @@ export interface SystemSlice {
   ytdlpVersion: string | null
   ytdlpLatestVersion: string | null
   ytdlpNeedsUpdate: boolean
-  ytdlpUpdateUrgency: 'none' | 'optional' | 'critical'  // Version policy urgency
+  
+  // FFmpeg Version Tracking
+  ffmpegVersion: string | null
+  ffmpegLatestVersion: string | null
+  ffmpegNeedsUpdate: boolean
+  
+  // Loading state for version check
+  isCheckingUpdates: boolean
   
   setBinariesReady: (ready: boolean) => void
   
   detectHardwareAccel: () => Promise<void>
   initListeners: () => void
-  checkYtDlpUpdate: () => Promise<void>
-  updateYtDlp: () => Promise<void>
+  checkBinaryUpdates: () => Promise<void> // Check for updates (replaces checkYtDlpUpdate + updateYtDlp)
   validateBinaries: () => Promise<void>
 }
 
@@ -124,6 +140,7 @@ export interface VideoSlice {
   updateTask: (id: string, updates: Partial<DownloadTask>) => void
   startTask: (id: string) => Promise<void>
   processQueue: () => void
+  importTasks: (tasks: DownloadTask[]) => void
 }
 
 export type AppState = UISlice & LogSlice & SettingsSlice & SystemSlice & VideoSlice

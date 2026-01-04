@@ -35,3 +35,5 @@ tauri-plugin-clipboard-manager = "2"
 tauri-plugin-autostart = "2"
 window-vibrancy = { git = "https://github.com/tauri-apps/window-vibrancy", branch = "dev" }
 tauri-plugin-os = "2"
+sysinfo = "0.33"
+tauri-plugin-deep-link = "2.4.5"

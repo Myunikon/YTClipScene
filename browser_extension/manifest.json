@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "ClipScene Download Manager",
+  "version": "1.0",
+  "description": "Download videos with ClipScene integration",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "128": "icon.png"
+  },
+  "action": {
+    "default_title": "ClipScene"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "clipscene@clipscene.app",
+      "strict_min_version": "109.0"
+    }
+  }
+}

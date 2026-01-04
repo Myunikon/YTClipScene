@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "clean": "taskkill /F /IM vite.exe /T || set ERRORLEVEL=0",
     "dev": "vite",
+    "start": "npm run clean && tauri dev",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
@@ -13,11 +15,11 @@
     "lint": "eslint ."
   },
   "dependencies": {
-
     "@tanstack/react-virtual": "^3.13.13",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-autostart": "^2.5.1",
     "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
+    "@tauri-apps/plugin-deep-link": "^2.4.5",
     "@tauri-apps/plugin-dialog": "^2.4.2",
     "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-http": "^2.5.4",

@@ -31,7 +31,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     embedMetadata: true,
     embedThumbnail: true,
     postDownloadAction: 'none',
-    developerMode: false
+    developerMode: false,
+    disablePlayButton: false
 }
 
 export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> = (set) => ({

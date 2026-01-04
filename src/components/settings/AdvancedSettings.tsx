@@ -1,9 +1,11 @@
-import { AlertCircle, Scissors, Database, ChevronRight } from 'lucide-react'
+import { AlertCircle, Scissors, Database, ChevronRight, Download, Upload, Trash2 } from 'lucide-react'
+import { clearCache } from '../../lib/ytdlp'
 import { Select } from '../Select'
 import { Switch } from '../Switch'
 import { AppSettings } from '../../store/slices/types'
 import { DEFAULT_SETTINGS } from '../../store/slices/createSettingsSlice'
 import { getBinaryName } from '../../lib/platform'
+import { useAppStore } from '../../store'
 
 interface AdvancedSettingsProps {
     settings: AppSettings
@@ -118,48 +120,142 @@ export function AdvancedSettings({ settings, setSetting, updateSettings, t }: Ad
                 <div className="pt-4 flex justify-end gap-2 text-xs">
                     <button 
                         onClick={() => {
-                            if (confirm(t.settings.advanced.confirm_redownload?.replace('Redownload', 'Reset') || "Are you sure you want to reset all settings to defaults?")) {
+                            if (confirm(t.settings.advanced.alerts.confirm_reset)) {
                                 updateSettings(DEFAULT_SETTINGS)
                                 window.location.reload() // Reload to apply clean state
                             }
                         }}
                         className="text-red-500 hover:bg-red-500/10 px-3 py-2 rounded-lg transition-colors font-medium border border-transparent hover:border-red-500/20"
                     >
-                        Reset to Defaults
+                        {t.settings.advanced.reset_defaults}
                     </button>
                 </div>
             </section>
-            <div className="pt-6 border-t border-border/50">
-                <h3 className="text-sm font-medium mb-3 text-purple-400">Developer Tools</h3>
-                <div className="bg-secondary/20 p-4 rounded-xl space-y-4">
-                    {/* Developer Mode Toggle */}
-                    <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-secondary/30 rounded-lg transition-colors">
-                        <div>
-                            <div className="font-medium">Developer Mode</div>
-                            <div className="text-xs text-muted-foreground">
-                                {t.settings.advanced.developer_mode_desc || 'Show command details on each download task'}
-                            </div>
-                        </div>
-                        <Switch 
-                            checked={settings.developerMode} 
-                            onCheckedChange={val => setSetting('developerMode', val)} 
-                        />
-                    </label>
 
-                    {/* Web Inspector */}
-                    <div className="flex items-center justify-between pt-2 border-t border-dashed border-border/50">
-                        <div>
-                            <div className="font-medium">Web Inspector</div>
-                            <div className="text-xs text-muted-foreground">Open browser DevTools for debugging</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <kbd className="px-2 py-1 bg-background border border-border rounded text-xs font-mono">F12</kbd>
-                            <span className="text-muted-foreground text-xs">or</span>
-                            <kbd className="px-2 py-1 bg-background border border-border rounded text-xs font-mono">Ctrl+Shift+I</kbd>
+
+            {/* Developer Tools */}
+            <section className="p-5 border rounded-xl bg-card/30 space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-purple-500"/> {t.settings.advanced.developer_tools}
+                </h3>
+                <label className="flex items-center justify-between cursor-pointer p-2 hover:bg-secondary/30 rounded-lg transition-colors">
+                    <div>
+                        <div className="font-medium">{t.settings.advanced.developer_mode}</div>
+                        <div className="text-xs text-muted-foreground">
+                            {t.settings.advanced.developer_mode_desc}
                         </div>
                     </div>
+                    <Switch 
+                        checked={settings.developerMode} 
+                        onCheckedChange={val => setSetting('developerMode', val)} 
+                    />
+                </label>
+            </section>
+            {/* Data Management */}
+            <section className="p-5 border rounded-xl bg-card/30 space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <Database className="w-4 h-4 text-blue-500" /> {t.settings.advanced.data_management}
+                </h3>
+                <div className="flex items-center justify-between p-2 hover:bg-secondary/30 rounded-lg transition-colors">
+                    <div>
+                        <div className="font-medium">{t.settings.advanced.export_history}</div>
+                        <div className="text-xs text-muted-foreground">{t.settings.advanced.export_desc}</div>
+                    </div>
+                    <button 
+                        onClick={async () => {
+                            try {
+                                const { save } = await import('@tauri-apps/plugin-dialog')
+                                const { writeTextFile } = await import('@tauri-apps/plugin-fs')
+                                const { tasks } = useAppStore.getState()
+                                
+                                const path = await save({
+                                    filters: [{ name: 'JSON', extensions: ['json'] }],
+                                    defaultPath: 'clipscene_history_backup.json'
+                                })
+                                
+                                if (path) {
+                                    const data = JSON.stringify({
+                                        version: 1,
+                                        date: new Date().toISOString(),
+                                        tasks
+                                    }, null, 2)
+                                    await writeTextFile(path, data)
+                                    alert(t.settings.advanced.alerts.export_success)
+                                }
+                            } catch (e) {
+                                console.error('Export failed', e)
+                                alert(t.settings.advanced.alerts.export_fail + e)
+                            }
+                        }}
+                        className="text-xs px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg transition-colors flex items-center gap-1.5 font-medium"
+                    >
+                        <Download className="w-3.5 h-3.5" />
+                        {t.settings.advanced.export_btn}
+                    </button>
                 </div>
-            </div>
+
+                <div className="border-t border-border/30 pt-3 flex items-center justify-between p-2 hover:bg-secondary/30 rounded-lg transition-colors">
+                    <div>
+                        <div className="font-medium">{t.settings.advanced.import_history}</div>
+                        <div className="text-xs text-muted-foreground">{t.settings.advanced.import_desc}</div>
+                    </div>
+                    <button 
+                        onClick={async () => {
+                            try {
+                                const { open } = await import('@tauri-apps/plugin-dialog')
+                                const { readTextFile } = await import('@tauri-apps/plugin-fs')
+                                
+                                const path = await open({
+                                    filters: [{ name: 'JSON', extensions: ['json'] }]
+                                })
+                                
+                                if (path && typeof path === 'string') {
+                                    const content = await readTextFile(path)
+                                    const data = JSON.parse(content)
+                                    
+                                    if (data && Array.isArray(data.tasks)) {
+                                        useAppStore.getState().importTasks(data.tasks)
+                                        alert(t.settings.advanced.alerts.import_success.replace('{n}', data.tasks.length))
+                                    } else {
+                                        alert(t.settings.advanced.alerts.invalid_backup)
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Import failed', e)
+                                alert(t.settings.advanced.alerts.import_fail + e)
+                            }
+                        }}
+                        className="text-xs px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-lg transition-colors flex items-center gap-1.5 font-medium"
+                    >
+                        <Upload className="w-3.5 h-3.5" />
+                        {t.settings.advanced.import_btn}
+                    </button>
+                </div>
+
+                <div className="border-t border-border/30 pt-3 flex items-center justify-between p-2 hover:bg-secondary/30 rounded-lg transition-colors">
+                    <div>
+                        <div className="font-medium">{t.settings.advanced.clear_cache || "Clear Internal Cache"}</div>
+                        <div className="text-xs text-muted-foreground">{t.settings.advanced.clear_cache_desc || "Frees up space by removing temporary yt-dlp files"}</div>
+                    </div>
+                    <button 
+                        onClick={async () => {
+                            try {
+                                const { toast } = await import('sonner')
+                                await clearCache()
+                                toast.success(t.settings.advanced.alerts?.cache_cleared || "Cache Cleared Successfully")
+                            } catch (e) {
+                                console.error('Cache clear failed', e)
+                                alert("Failed to clear cache: " + e)
+                            }
+                        }}
+                        className="text-xs px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg transition-colors flex items-center gap-1.5 font-medium"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        {t.settings.advanced.clear_btn || "Clear"}
+                    </button>
+                </div>
+            </section>
+
         </div>
     )
 }
