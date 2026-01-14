@@ -218,7 +218,7 @@ function App() {
           if (needsProcessing) {
               processQueue()
           }
-      }, 30000) 
+      }, 10000) // Check every 10 seconds for scheduled tasks
       
       return () => clearInterval(interval)
   }, [])
@@ -356,25 +356,6 @@ function App() {
         }
     }
     checkStartMinimized()
-  }, [])
-
-  /* -------------------------------------------------------------------------- */
-  /* WINDOW CLOSE INTERCEPTOR                                                   */
-  /* -------------------------------------------------------------------------- */
-  useEffect(() => {
-    const appWindow = getCurrentWindow()
-    const unlisten = appWindow.onCloseRequested(async (event) => {
-        const currentSettings = useAppStore.getState().settings
-        if (currentSettings.closeAction === 'minimize') {
-            event.preventDefault()
-            try {
-                await appWindow.hide()
-            } catch (e) {
-                console.warn('window.hide not available:', e)
-            }
-        }
-    })
-    return () => { unlisten.then(f => f()) }
   }, [])
 
   useEffect(() => {

@@ -78,7 +78,7 @@ export const createSystemSlice: StateCreator<AppState, [], [], SystemSlice> = (s
                 const finalType = validTypes.includes(gpuInfo.vendor) ? gpuInfo.vendor : 'cpu'
                 
                 set({ 
-                    gpuType: finalType as any,
+                    gpuType: finalType as 'nvidia' | 'amd' | 'intel' | 'cpu',
                     gpuModel: gpuInfo.model,
                     gpuRenderer: gpuInfo.renderer
                 })

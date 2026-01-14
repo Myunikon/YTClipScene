@@ -17,7 +17,7 @@ interface SelectDownloadTypeProps {
 
 export function SelectDownloadType({ 
     options, setters,
-    availableResolutions, availableAudioBitrates, availableVideoCodecs, availableAudioCodecs,
+    availableResolutions, availableAudioBitrates, availableVideoCodecs,
     isLowPerf = false
 }: SelectDownloadTypeProps) {
     const { format, container, audioBitrate, audioFormat, videoCodec: codec } = options

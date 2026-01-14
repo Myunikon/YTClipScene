@@ -9,6 +9,7 @@ export interface DownloadOptions {
   splitChapters?: boolean // Split video into multiple files based on chapters
   customFilename?: string // User-defined filename (without extension)
   audioBitrate?: string // Audio quality in kbps (128, 192, 320)
+  audioFormat?: 'mp3' | 'm4a' | 'flac' | 'wav' | 'opus' | 'aac' // Audio format for extraction
   subtitles?: boolean // Download subtitles
   subtitleFormat?: string // format to convert subtitles to (srt, ass, vtt, lrc)
   subtitleLang?: string // Subtitle language (en, id, auto, all)
@@ -63,7 +64,7 @@ export interface AppSettings {
   alwaysAskPath: boolean
   filenameTemplate: string
   resolution: string
-  container: 'mp4' | 'mkv'
+  container: 'mp4' | 'mkv' | 'webm' | 'mov'
   hardwareDecoding: 'auto' | 'cpu' | 'gpu'
 
 

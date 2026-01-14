@@ -421,8 +421,13 @@ export function HistoryView() {
                 valB = parseSize(b.fileSize || '0')
                 break
             case 'source':
-                valA = new URL(a.url).hostname
-                valB = new URL(b.url).hostname
+                try {
+                    valA = new URL(a.url).hostname
+                    valB = new URL(b.url).hostname
+                } catch {
+                    valA = a.url || ''
+                    valB = b.url || ''
+                }
                 break
             case 'date':
             default:
