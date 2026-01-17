@@ -1,7 +1,7 @@
 {
   "name": "sceneclip",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.3",
   "type": "module",
   "scripts": {
     "clean": "taskkill /F /IM vite.exe /T || set ERRORLEVEL=0",
