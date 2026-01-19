@@ -1,4 +1,4 @@
-import { Zap, Monitor, Music, Film, Smartphone, Sparkles, Cpu, FileVideo2, Star, TriangleAlert } from 'lucide-react'
+import { Zap, Monitor, Music, Film, Smartphone, Sparkles, FileVideo2, Star } from 'lucide-react'
 import { translations } from '../lib/locales'
 import { useAppStore } from '../store'
 import { cn } from '../lib/utils'
@@ -15,14 +15,14 @@ interface SelectDownloadTypeProps {
     isLowPerf?: boolean
 }
 
-export function SelectDownloadType({ 
+export function SelectDownloadType({
     options, setters,
-    availableResolutions, availableAudioBitrates, availableVideoCodecs,
+    availableResolutions, availableAudioBitrates,
     isLowPerf = false
 }: SelectDownloadTypeProps) {
-    const { format, container, audioBitrate, audioFormat, videoCodec: codec } = options
-    const { setFormat, setContainer, setAudioBitrate, setAudioFormat, setVideoCodec: setCodec } = setters
-    
+    const { format, container, audioBitrate, audioFormat } = options
+    const { setFormat, setContainer, setAudioBitrate, setAudioFormat } = setters
+
     // Default values fallback not needed as hook provides defaults
     const { settings } = useAppStore()
     const t = translations[settings.language].dialog
@@ -38,8 +38,8 @@ export function SelectDownloadType({
                 let desc = t.quality_profiles.standard
                 if (rate >= 256) desc = t.quality_profiles.highest_quality
                 if (rate <= 64) desc = t.quality_profiles.data_saver // Reusing data saver for low quality
-                
-                return { value: rate.toString(), label: `${rate} kbps`, desc}
+
+                return { value: rate.toString(), label: `${rate} kbps`, desc }
             })
         ]
         : [
@@ -48,25 +48,25 @@ export function SelectDownloadType({
             { value: '192', label: '192 kbps', desc: t.quality_profiles.standard },
             { value: '128', label: '128 kbps', desc: t.quality_profiles.data_saver },
         ]
-        
+
     const videoFormats = (availableResolutions && availableResolutions.length > 0)
         ? [
             { value: 'Best', label: t.formats.best, icon: Sparkles, desc: t.quality_profiles.highest_quality },
             ...availableResolutions
                 .filter(h => h >= 144) // Filter out very low resolutions (< 144p)
                 .map(h => {
-                let label = `${h}p`
-                let icon = Smartphone
-                let desc = t.quality_profiles.standard
-                
-                if (h >= 2160) { label = '4K'; icon = Monitor; desc = t.quality_profiles.ultra_hd }
-                else if (h === 1440) { label = '2K'; icon = Monitor; desc = t.quality_profiles.qhd }
-                else if (h === 1080) { label = '1080p'; icon = Film; desc = t.quality_profiles.full_hd }
-                else if (h === 720) { label = '720p'; icon = Film; desc = t.quality_profiles.hd }
-                else if (h < 480) { icon = Smartphone; desc = t.quality_profiles.data_saver }
-                
-                return { value: `${h}p`, label, icon, desc }
-            })
+                    let label = `${h}p`
+                    let icon = Smartphone
+                    let desc = t.quality_profiles.standard
+
+                    if (h >= 2160) { label = '4K'; icon = Monitor; desc = t.quality_profiles.ultra_hd }
+                    else if (h === 1440) { label = '2K'; icon = Monitor; desc = t.quality_profiles.qhd }
+                    else if (h === 1080) { label = '1080p'; icon = Film; desc = t.quality_profiles.full_hd }
+                    else if (h === 720) { label = '720p'; icon = Film; desc = t.quality_profiles.hd }
+                    else if (h < 480) { icon = Smartphone; desc = t.quality_profiles.data_saver }
+
+                    return { value: `${h}p`, label, icon, desc }
+                })
         ]
         : [
             { value: 'Best', label: t.formats.best, icon: Sparkles, desc: t.quality_profiles.highest_quality },
@@ -81,7 +81,7 @@ export function SelectDownloadType({
                 <div className="space-y-4">
                     {/* 1. Resolution Card */}
                     <div className="p-3 rounded-xl border bg-transparent border-white/10 space-y-3">
-                         <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                             <div className="p-1.5 rounded-lg bg-white/10 text-muted-foreground shrink-0">
                                 <Monitor className="w-4 h-4" />
                             </div>
@@ -89,17 +89,17 @@ export function SelectDownloadType({
                                 <div className="font-bold text-[0.93rem] leading-none">{t.gif_options?.res_title}</div>
                                 <div className="text-xs text-muted-foreground mt-0.5 opacity-80">
                                     {options.gifScale === 0 ? t.gif_options?.res_desc :  // Hack: 0 is original
-                                     options.gifScale === 480 ? t.gif_options?.res_desc :
-                                     t.gif_options?.res_desc}
+                                        options.gifScale === 480 ? t.gif_options?.res_desc :
+                                            t.gif_options?.res_desc}
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                             {[
-                                { val: 0, label: t.gif_options?.res_original },
-                                { val: 480, label: t.gif_options?.res_social },
-                                { val: 320, label: t.gif_options?.res_sticker },
+                                { val: 480, label: "High (480p)" },
+                                { val: 320, label: "Medium (320p)" },
+                                { val: 240, label: "Low (240p)" },
                             ].map(s => (
                                 <button
                                     key={s.val}
@@ -116,11 +116,17 @@ export function SelectDownloadType({
                                 </button>
                             ))}
                         </div>
+
+                        {/* Warning for user education */}
+                        <div className="text-[10px] text-yellow-500/80 bg-yellow-500/5 p-2 rounded-lg border border-yellow-500/10 flex items-center gap-2">
+                            <span className="shrink-0">⚠️</span>
+                            <span>GIFs are limited to 480p to prevent huge file sizes and crashes.</span>
+                        </div>
                     </div>
 
                     {/* 2. FPS Card */}
                     <div className="p-3 rounded-xl border bg-transparent border-white/10 space-y-3">
-                         <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                             <div className="p-1.5 rounded-lg bg-white/10 text-muted-foreground shrink-0">
                                 <Film className="w-4 h-4" />
                             </div>
@@ -131,7 +137,7 @@ export function SelectDownloadType({
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                             {[
                                 { val: 30, label: t.gif_options?.fps_smooth },
@@ -157,7 +163,7 @@ export function SelectDownloadType({
 
                     {/* 3. Quality Card */}
                     <div className="p-3 rounded-xl border bg-transparent border-white/10 space-y-3">
-                         <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                             <div className="p-1.5 rounded-lg bg-white/10 text-muted-foreground shrink-0">
                                 <Sparkles className="w-4 h-4" />
                             </div>
@@ -168,9 +174,9 @@ export function SelectDownloadType({
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
-                             {[
+                            {[
                                 { id: 'high', label: t.gif_options?.quality_high, recommended: true },
                                 { id: 'fast', label: t.gif_options?.quality_fast, recommended: false },
                             ].map(q => (
@@ -186,9 +192,9 @@ export function SelectDownloadType({
                                     )}
                                 >
                                     {q.recommended && (
-                                         <div className="absolute -top-1 -right-1">
+                                        <div className="absolute -top-1 -right-1">
                                             <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-                                         </div>
+                                        </div>
                                     )}
                                     {q.label}
                                 </button>
@@ -223,7 +229,7 @@ export function SelectDownloadType({
                                         onClick={() => setAudioBitrate && setAudioBitrate(f.value)}
                                         className={cn(
                                             "relative flex items-center p-3 rounded-xl border text-left gap-3 transition-all",
-                                            isSelected 
+                                            isSelected
                                                 ? isLowPerf ? "bg-blue-50 dark:bg-blue-950 border-blue-500" : "bg-primary/10 dark:bg-white/5 border-primary/50 dark:border-white/20 ring-1 ring-primary/30 dark:ring-white/20"
                                                 : isLowPerf ? "bg-card border-border hover:bg-muted" : "bg-black/20 border-white/5 hover:bg-white/5"
                                         )}
@@ -234,7 +240,7 @@ export function SelectDownloadType({
                                         )}>
                                             <Music className="w-4 h-4" />
                                         </div>
-                                        
+
                                         <div>
                                             <div className={cn("font-bold text-sm", isSelected ? "text-foreground" : "text-muted-foreground")}>
                                                 {f.label}
@@ -244,9 +250,9 @@ export function SelectDownloadType({
                                             </div>
                                         </div>
                                         {isBest && (
-                                             <div className="absolute top-2 right-2">
+                                            <div className="absolute top-2 right-2">
                                                 <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                                             </div>
+                                            </div>
                                         )}
                                     </button>
                                 )
@@ -256,7 +262,7 @@ export function SelectDownloadType({
 
                     {/* 2. Audio Format Card */}
                     <div className="p-3 rounded-xl border bg-transparent border-white/10 space-y-3 mt-1">
-                         <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
                             <div className="p-1.5 rounded-lg bg-white/10 text-muted-foreground shrink-0">
                                 <Music className="w-4 h-4" />
                             </div>
@@ -264,14 +270,14 @@ export function SelectDownloadType({
                                 <div className="font-bold text-[0.93rem] leading-none">Audio Format</div>
                                 <div className="text-xs text-muted-foreground mt-0.5 opacity-80">
                                     {audioFormat === 'mp3' ? "Universal (Music/Podcast)" :
-                                     audioFormat === 'm4a' ? "Efficient (Apple/Mobile)" :
-                                     audioFormat === 'flac' ? "Lossless (Audiophile)" :
-                                     audioFormat === 'wav' ? "Uncompressed (Editing)" :
-                                     "Select Format"}
+                                        audioFormat === 'm4a' ? "Efficient (Apple/Mobile)" :
+                                            audioFormat === 'flac' ? "Lossless (Audiophile)" :
+                                                audioFormat === 'wav' ? "Uncompressed (Editing)" :
+                                                    "Select Format"}
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className={cn("flex items-center gap-1.5 overflow-x-auto pb-1")}>
                             {['mp3', 'm4a', 'flac', 'wav'].map(c => (
                                 <button
@@ -280,7 +286,7 @@ export function SelectDownloadType({
                                     onClick={() => setAudioFormat && setAudioFormat(c)}
                                     className={cn(
                                         "flex-1 px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all border",
-                                        audioFormat === c 
+                                        audioFormat === c
                                             ? isLowPerf ? "bg-blue-600 text-white" : "bg-primary/10 dark:bg-white/10 border-primary/30 dark:border-white/20 text-foreground shadow-sm"
                                             : "bg-black/20 border-white/5 text-muted-foreground hover:bg-white/5"
                                     )}
@@ -306,11 +312,11 @@ export function SelectDownloadType({
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             {videoFormats.map((f) => {
                                 const isSelected = format === f.value
-                                
+
                                 return (
                                     <button
                                         key={f.value}
@@ -318,7 +324,7 @@ export function SelectDownloadType({
                                         onClick={() => setFormat(f.value)}
                                         className={cn(
                                             "relative flex items-center justify-center p-2 rounded-xl border text-center h-[50px] transition-all",
-                                            isSelected 
+                                            isSelected
                                                 ? isLowPerf ? "bg-primary/10 border-primary" : "bg-primary/10 dark:bg-white/5 border-primary/50 dark:border-white/20 text-foreground shadow-sm ring-1 ring-primary/30 dark:ring-white/20"
                                                 : isLowPerf ? "bg-card border-border hover:bg-muted" : "bg-black/20 border-white/5 hover:bg-white/5"
                                         )}
@@ -326,14 +332,14 @@ export function SelectDownloadType({
                                         {isSelected && (
                                             <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary dark:bg-white shadow-sm" />
                                         )}
-                                        
+
                                         <div className={cn("font-bold text-xs leading-tight", isSelected ? "text-foreground" : "text-muted-foreground")}>
                                             {f.label}
                                         </div>
                                         {f.value === 'Best' && (
-                                             <div className="absolute -top-1 -right-1">
+                                            <div className="absolute -top-1 -right-1">
                                                 <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-                                             </div>
+                                            </div>
                                         )}
                                     </button>
                                 )
@@ -351,10 +357,10 @@ export function SelectDownloadType({
                                 <div className="font-bold text-[0.93rem] leading-none">{t.output_format?.title || "Output Format"}</div>
                                 <div className="text-xs text-muted-foreground mt-0.5 opacity-80">
                                     {container === 'mp4' ? t.output_format?.desc_mp4 :
-                                     container === 'mkv' ? t.output_format?.desc_mkv :
-                                     container === 'webm' ? t.output_format?.desc_webm :
-                                     container === 'mov' ? t.output_format?.desc_mov :
-                                     t.output_format?.desc_default}
+                                        container === 'mkv' ? t.output_format?.desc_mkv :
+                                            container === 'webm' ? t.output_format?.desc_webm :
+                                                container === 'mov' ? t.output_format?.desc_mov :
+                                                    t.output_format?.desc_default}
                                 </div>
                             </div>
                         </div>
@@ -366,7 +372,7 @@ export function SelectDownloadType({
                                     onClick={() => setContainer(c)}
                                     className={cn(
                                         "flex-1 px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all border",
-                                        container === c 
+                                        container === c
                                             ? "bg-primary/10 dark:bg-white/10 border-primary/30 dark:border-white/20 text-foreground shadow-sm"
                                             : "bg-black/20 border-white/5 text-muted-foreground hover:bg-white/5"
                                     )}
@@ -375,71 +381,6 @@ export function SelectDownloadType({
                                 </button>
                             ))}
                         </div>
-                    </div>
-                    
-                    {/* 3. Codec Card */}
-                    <div className="p-3 rounded-xl border bg-transparent border-white/10 space-y-3 mt-1">
-                        <div className="flex items-center gap-3">
-                            <div className="p-1.5 rounded-lg bg-white/10 text-muted-foreground shrink-0">
-                                <Cpu className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-[0.93rem] leading-none">{t.codec?.label || "Codec"}</div>
-                                <div className="text-xs text-muted-foreground mt-0.5 opacity-80">
-                                    {codec === 'h264' ? t.codec?.h264 :
-                                     codec === 'hevc' ? t.codec?.hevc :
-                                     codec === 'vp9' ? t.codec?.vp9 :
-                                     codec === 'av1' ? t.codec?.av1 :
-                                     t.codec?.auto_desc}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Re-encoding Warning */}
-                        {codec !== 'auto' && availableVideoCodecs && !availableVideoCodecs.includes(codec) && (
-                            <div className="flex items-start gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400 animate-in fade-in slide-in-from-top-1">
-                                <TriangleAlert className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                                <div className="text-xs leading-tight font-medium">
-                                    <span className="font-bold">⚠️ {t.codec?.warning_title}:</span> {t.codec?.warning_desc?.replace('{codec}', codec.toUpperCase())}
-                                </div>
-                            </div>
-                        )}
-                        
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                            {[
-                                { id: 'auto', label: 'Auto' },
-                                { id: 'h264', label: 'H.264' },
-                                { id: 'hevc', label: 'H.265' },
-                                { id: 'vp9', label: 'VP9' },
-                                { id: 'av1', label: 'AV1' }
-                            ].map(c => (
-                                <button
-                                    key={c.id}
-                                    type="button"
-                                    onClick={() => setCodec && setCodec(c.id)}
-                                    className={cn(
-                                        "relative flex-1 px-3 py-2 rounded-lg text-[0.65rem] font-bold uppercase transition-all border",
-                                        codec === c.id
-                                            ? "bg-primary/10 dark:bg-white/10 border-primary/30 dark:border-white/20 text-foreground shadow-sm"
-                                            : "bg-black/20 border-white/5 text-muted-foreground hover:bg-white/5"
-                                    )}
-                                >
-                                    {c.id === 'auto' && (
-                                         <div className="absolute -top-1 -right-1">
-                                            <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-                                         </div>
-                                    )}
-                                    {c.label}
-                                </button>
-                            ))}
-                        </div>
-                        {/* Logic Constraint Warning */}
-                        {container === 'mov' && ['av1', 'vp9', 'hevc'].includes(codec) && (
-                            <div className="flex items-start gap-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
-                                <TriangleAlert className="w-3.5 h-3.5 mt-0.5" />
-                                <div className="text-[0.65rem] leading-tight font-medium" dangerouslySetInnerHTML={{ __html: t.logic_warnings?.mov_reencode.replace('{codec}', codec.toUpperCase()) || "" }} />
-                            </div>
-                        )}
                     </div>
                 </div>
             )}

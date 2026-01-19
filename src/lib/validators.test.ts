@@ -33,7 +33,8 @@ describe('isValidVideoUrl', () => {
     })
 
     it('should reject URLs exceeding MAX_URL_LENGTH', () => {
-        const longUrl = 'https://example.com/' + 'a'.repeat(MAX_URL_LENGTH)
+        // Create a URL that is definitely longer than 2000 characters
+        const longUrl = 'https://example.com/' + 'a'.repeat(MAX_URL_LENGTH + 1)
         expect(isValidVideoUrl(longUrl)).toBe(false)
     })
 

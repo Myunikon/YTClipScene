@@ -1,4 +1,4 @@
-// ClipScene Content Script
+// SceneClip Content Script
 // Detects videos and shows download button using a safe overlay strategy
 
 const DOWNLOAD_ICON = `
@@ -26,13 +26,13 @@ function updatePosition(video, btn) {
 
   // Position at top-right of the video
   // Collision tweak: Move 50px down and 10px left to avoid common overlaps (Cast/Settings)
-  const top = rect.top + scrollY + 16; 
-  const right = document.documentElement.clientWidth - (rect.right + scrollX) + 16; 
+  const top = rect.top + scrollY + 16;
+  const right = document.documentElement.clientWidth - (rect.right + scrollX) + 16;
   // Note: We use 'right' for better anchoring 
-  
+
   btn.style.top = `${top}px`;
   btn.style.right = `${right}px`;
-  
+
   // Visibility check
   if (rect.width === 0 || rect.height === 0 || video.style.display === 'none') {
     btn.style.display = 'none';
@@ -48,8 +48,8 @@ function createOverlay(video) {
   const btn = document.createElement("button");
   btn.className = "clipscene-download-btn";
   btn.innerHTML = `${DOWNLOAD_ICON} Download`;
-  btn.title = "Download with ClipScene";
-  
+  btn.title = "Download with SceneClip";
+
   // Style for body-attachment
   Object.assign(btn.style, {
     position: 'absolute',
@@ -61,11 +61,11 @@ function createOverlay(video) {
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Prefer Page URL for YouTube, fallback to src for direct files
     const urlToDownload = window.location.href;
     const protocolUrl = `clipscene://download?url=${encodeURIComponent(urlToDownload)}`;
-    
+
     // "Blinking Tab" hack for protocol triggering (Reliable cross-browser)
     window.location.assign(protocolUrl);
   });
@@ -75,9 +75,9 @@ function createOverlay(video) {
   const hideBtn = () => {
     // Small delay to allow moving from video to button
     setTimeout(() => {
-        if (!btn.matches(':hover') && !video.matches(':hover')) {
-            btn.classList.remove('visible');
-        }
+      if (!btn.matches(':hover') && !video.matches(':hover')) {
+        btn.classList.remove('visible');
+      }
     }, 100);
   };
 
@@ -126,7 +126,7 @@ const observer = new MutationObserver((mutations) => {
   for (const mutation of mutations) {
     if (mutation.addedNodes.length > 0) shouldCheck = true;
   }
-  
+
   if (shouldCheck) {
     document.querySelectorAll("video").forEach(createOverlay);
   }

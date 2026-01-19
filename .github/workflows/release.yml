@@ -11,7 +11,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - platform: windows-latest
+            args: ""
+          - platform: macos-latest
+            args: "--target universal-apple-darwin"
+          - platform: ubuntu-22.04
+            args: ""
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -20,27 +26,21 @@ jobs:
 
       # --- Linux Setup ---
       - name: Install dependencies (Ubuntu)
-        if: matrix.platform == 'ubuntu-latest'
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev ffmpeg
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev xz-utils
 
-      # --- macOS Setup ---
-      - name: Install dependencies (macOS)
+      # --- macOS Setup for Universal Build ---
+      - name: Setup macOS Universal Build
         if: matrix.platform == 'macos-latest'
         run: |
-          brew install ffmpeg
-
-      # --- Windows Setup ---
-      - name: Install dependencies (Windows)
-        if: matrix.platform == 'windows-latest'
-        run: choco install ffmpeg
+          # Install both architectures for universal binary
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
       # --- Rust Setup ---
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -56,9 +56,22 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      # --- Binaries Setup ---
+      # --- Binaries Setup (Downloads ffmpeg and yt-dlp directly) ---
       - name: Setup Sidecar Binaries
         run: npm run setup-binaries
+
+      # --- macOS: Setup binaries for both architectures ---
+      - name: Setup Sidecar Binaries (macOS arm64)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          # Rename x86_64 binaries
+          cd src-tauri/binaries
+          # Download arm64 versions
+          curl -L -o yt-dlp-aarch64-apple-darwin https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos
+          chmod +x yt-dlp-aarch64-apple-darwin
+          # For ffmpeg, evermeet provides universal binary, copy it
+          cp ffmpeg-x86_64-apple-darwin ffmpeg-aarch64-apple-darwin
+          chmod +x ffmpeg-aarch64-apple-darwin
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
@@ -66,37 +79,164 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "SceneClip v__VERSION__"
+          releaseName: "SceneClip ${{ github.ref_name }}"
           releaseBody: |
-            ## 🚀 What's New
-            See the commit history for detailed changes in this version.
+            ## 🎬 SceneClip ${{ github.ref_name }}
 
-            ## 📦 Installation Guide
+            ### 📋 Changelog
+            - ✅ Bundled ffmpeg and yt-dlp included (no separate installation needed!)
+            - ✅ Portable version available for Windows and macOS
+            - 🔧 Improved stability and performance
+            - 🐛 Bug fixes and improvements
+
+            See the [commit history](https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}) for detailed changes.
+
+            ---
+
+            ## 📦 Download Guide
 
             ### 🪟 Windows
-            1. Download the `.exe` setup file (e.g., `SceneClip_*_x64-setup.exe`).
-            2. Run the installer.
-            3. **Note:** If you see a "Windows protected your PC" (SmartScreen) warning:
-               - Click **"More info"**.
-               - Click **"Run anyway"**.
-               *(This appears because the app is not digitally signed yet)*.
+
+            | Type | File | Description |
+            |------|------|-------------|
+            | **Installer** | `SceneClip_*_x64-setup.exe` | Recommended. Installs to Program Files |
+            | **Portable** | `SceneClip_*_x64_portable.zip` | No installation needed. Extract and run |
+
+            > **Note:** If you see "Windows protected your PC" (SmartScreen):
+            > 1. Click **"More info"**
+            > 2. Click **"Run anyway"**
+            > *(App is not code-signed yet)*
+
+            ---
 
             ### 🍎 macOS
-            1. Download the `.dmg` file.
-            2. Open it and drag **SceneClip** to your `Applications` folder.
-            3. If you can't open it due to "Unidentified Developer":
-               - Right-click the app in Finder.
-               - Select **Open**.
-               - Click **Open** in the dialog.
+
+            | Type | File | Description |
+            |------|------|-------------|
+            | **DMG** | `SceneClip_*_universal.dmg` | Drag to Applications folder |
+            | **Portable** | `SceneClip_*_macos_portable.zip` | Extract and run directly |
+
+            > **Note:** If you see "unidentified developer":
+            > 1. Right-click the app → **Open**
+            > 2. Click **Open** in the dialog
+
+            ---
 
             ### 🐧 Linux
-            **AppImage:**
-            1. Download the `.AppImage` file.
-            2. Make it executable: `chmod +x SceneClip_*.AppImage`
-            3. Run it: `./SceneClip_*.AppImage`
 
-            **Debian/Ubuntu:**
-            1. Download the `.deb` file.
-            2. Install it: `sudo dpkg -i SceneClip_*.deb`
+            | Type | File | Description |
+            |------|------|-------------|
+            | **AppImage** | `SceneClip_*_amd64.AppImage` | Portable! `chmod +x` and run |
+            | **Debian/Ubuntu** | `SceneClip_*_amd64.deb` | `sudo dpkg -i SceneClip_*.deb` |
+
+            ---
+
+            ## 🧩 Browser Extension
+
+            Download `SceneClip_browser_extension.zip` and install manually:
+
+            **Chrome/Brave/Edge:**
+            1. Go to `chrome://extensions`
+            2. Enable "Developer mode" (top right)
+            3. Click "Load unpacked"
+            4. Select the extracted extension folder
+
+            **Firefox:**
+            1. Go to `about:debugging`
+            2. Click "This Firefox" > "Load Temporary Add-on"
+            3. Select any file in the extension folder
+
+            ---
+
+            ## ✨ Included Dependencies
+            - **ffmpeg** - Video processing (bundled)
+            - **yt-dlp** - Video downloading (bundled)
+
+            No additional software installation required!
           releaseDraft: true
           prerelease: false
+          args: ${{ matrix.args }}
+
+      # --- Create Browser Extension ZIP (run on one platform only) ---
+      - name: Create Browser Extension ZIP
+        if: matrix.platform == 'windows-latest'
+        run: |
+          Compress-Archive -Path "browser_extension/*" -DestinationPath "SceneClip_browser_extension.zip"
+        shell: pwsh
+
+      - name: Upload Browser Extension ZIP
+        if: matrix.platform == 'windows-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: SceneClip_browser_extension.zip
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Create Portable ZIP (Windows) ---
+      - name: Create Portable ZIP (Windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $portableDir = "SceneClip_${version}_x64_portable"
+          
+          # Create portable directory
+          New-Item -ItemType Directory -Force -Path $portableDir
+          
+          # Copy the exe and resources from NSIS build output
+          $nsisDir = "src-tauri/target/release"
+          Copy-Item "$nsisDir/SceneClip.exe" "$portableDir/"
+          
+          # Copy sidecar binaries
+          if (Test-Path "$nsisDir/ffmpeg-x86_64-pc-windows-msvc.exe") {
+            Copy-Item "$nsisDir/ffmpeg-x86_64-pc-windows-msvc.exe" "$portableDir/"
+          }
+          if (Test-Path "$nsisDir/yt-dlp-x86_64-pc-windows-msvc.exe") {
+            Copy-Item "$nsisDir/yt-dlp-x86_64-pc-windows-msvc.exe" "$portableDir/"
+          }
+          
+          # Also check in binaries folder
+          if (Test-Path "src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe") {
+            Copy-Item "src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe" "$portableDir/"
+          }
+          if (Test-Path "src-tauri/binaries/yt-dlp-x86_64-pc-windows-msvc.exe") {
+            Copy-Item "src-tauri/binaries/yt-dlp-x86_64-pc-windows-msvc.exe" "$portableDir/"
+          }
+          
+          # Create ZIP
+          Compress-Archive -Path "$portableDir/*" -DestinationPath "SceneClip_${version}_x64_portable.zip"
+          
+          echo "PORTABLE_ZIP=SceneClip_${version}_x64_portable.zip" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      # --- Create Portable ZIP (macOS) ---
+      - name: Create Portable ZIP (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          version="${{ github.ref_name }}"
+          version="${version#v}"
+          portable_dir="SceneClip_${version}_macos_portable"
+          
+          mkdir -p "$portable_dir"
+          
+          # Find and copy the .app bundle
+          if [ -d "src-tauri/target/universal-apple-darwin/release/bundle/macos/SceneClip.app" ]; then
+            cp -R "src-tauri/target/universal-apple-darwin/release/bundle/macos/SceneClip.app" "$portable_dir/"
+          elif [ -d "src-tauri/target/release/bundle/macos/SceneClip.app" ]; then
+            cp -R "src-tauri/target/release/bundle/macos/SceneClip.app" "$portable_dir/"
+          fi
+          
+          # Create ZIP
+          zip -r "SceneClip_${version}_macos_portable.zip" "$portable_dir"
+          
+          echo "PORTABLE_ZIP=SceneClip_${version}_macos_portable.zip" >> $GITHUB_ENV
+
+      # --- Upload Portable ZIP ---
+      - name: Upload Portable ZIP to Release
+        if: matrix.platform == 'windows-latest' || matrix.platform == 'macos-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.PORTABLE_ZIP }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

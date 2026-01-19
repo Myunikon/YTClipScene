@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-    Settings, AlertCircle, Music, Radio, List, Calendar, Clock, MessageSquare, Subtitles, Scissors, ChevronDown, 
-    Monitor, Film 
+import {
+    Settings, AlertCircle, Music, List, Calendar, Clock, MessageSquare, Subtitles, Scissors, ChevronDown,
+    Monitor, Film, Cpu, TriangleAlert
 } from 'lucide-react'
 
 import { SelectDownloadType } from '../SelectDownloadType'
@@ -14,22 +14,7 @@ import { VideoMeta, DialogOptions, DialogOptionSetters } from '../../types'
 import { cn } from '../../lib/utils'
 
 // --- 1. KOMPONEN BANTUAN KECIL ---
-function HelpTip({ show, text }: { show: boolean, text: string }) {
-    return (
-        <AnimatePresence>
-            {show && (
-                <motion.div
-                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                    animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
-                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                    className="text-[10px] leading-relaxed text-blue-300 bg-blue-500/10 border border-blue-500/20 p-2 rounded-lg font-medium overflow-hidden"
-                >
-                    💡 {text}
-                </motion.div>
-            )}
-        </AnimatePresence>
-    )
-}
+
 
 // --- 2. KOMPONEN TAB TYPE ---
 function DownloadTypeTabs({ mode, onChange, isLowPerf, t }: { mode: 'video' | 'audio' | 'gif', onChange: (m: 'video' | 'audio' | 'gif') => void, isLowPerf: boolean, t: any }) {
@@ -50,17 +35,17 @@ function DownloadTypeTabs({ mode, onChange, isLowPerf, t }: { mode: 'video' | 'a
                         onClick={() => onChange(tab.id)}
                         className={cn(
                             "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold relative transition-colors",
-                            isActive 
-                                ? "text-white" 
+                            isActive
+                                ? "text-white"
                                 : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                         )}
                     >
                         {isActive && (
                             <motion.div
                                 layoutId="activeTab"
-                                className={cn("absolute inset-0 rounded-lg shadow-lg", 
-                                    tab.id === 'video' ? "bg-violet-600" : 
-                                    tab.id === 'audio' ? "bg-blue-600" : "bg-pink-600"
+                                className={cn("absolute inset-0 rounded-lg shadow-lg",
+                                    tab.id === 'video' ? "bg-violet-600" :
+                                        tab.id === 'audio' ? "bg-blue-600" : "bg-pink-600"
                                 )}
                                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                             />
@@ -80,7 +65,7 @@ interface RightPanelProps {
     hasMeta: boolean
     meta: VideoMeta | null
     t: any
-    
+
     // Grouped Props
     options: DialogOptions
     setters: DialogOptionSetters
@@ -90,7 +75,7 @@ interface RightPanelProps {
     availableVideoCodecs: string[] | undefined
     availableAudioCodecs: string[] | undefined
     availableLanguages: any[]
-    showHelp: boolean 
+
     isLowPerf?: boolean
 }
 
@@ -102,12 +87,12 @@ export function RightPanel({
     availableVideoCodecs,
     availableAudioCodecs,
     availableLanguages,
-    showHelp,
+
     isLowPerf = false
 }: RightPanelProps) {
 
     if (!hasMeta) return null
-    
+
     // Collapsible State for Enhancements
     const [showEnhancements, setShowEnhancements] = useState(false)
 
@@ -123,7 +108,7 @@ export function RightPanel({
     return (
         <div className="lg:flex-1 min-w-0 relative z-0 flex flex-col bg-transparent dark:bg-black/20 lg:overflow-hidden">
             <div className="lg:flex-1 lg:overflow-y-auto p-6 space-y-6 lg:min-w-[28rem]">
-                
+
                 {/* 1. Global Tabs with Bounce Animation */}
                 <DownloadTypeTabs mode={mode} onChange={handleModeChange} isLowPerf={isLowPerf} t={t} />
 
@@ -146,31 +131,23 @@ export function RightPanel({
                             availableAudioCodecs={availableAudioCodecs}
                             isLowPerf={isLowPerf}
                         />
-                        
-                        {/* Format Help */}
-                        <HelpTip show={showHelp} text={t.help?.format_help || "Choose 'Video' for image+sound, 'Audio' for music only, or 'GIF' for short silent animations."} />
-                        <div className="space-y-1">
-                            <HelpTip show={showHelp && options.format === 'video'} text={t.help?.mp4_help || "MP4 is safest for all devices/TVs."} />
-                            <HelpTip show={showHelp && options.format === 'video'} text={t.help?.codec_help || "H.264 is compatible with everything."} />
-                            <HelpTip show={showHelp && options.format === 'audio'} text={t.help?.audio_help || "320kbps is studio quality."} />
-                        </div>
 
                         {!options.batchMode && (mode === 'video' || mode === 'gif' || mode === 'audio') && (
                             <div className={cn(
                                 "pt-4 border-t",
-                                mode === 'gif' 
-                                    ? "border-pink-300 dark:border-pink-500/30 bg-pink-100 dark:bg-pink-500/5 -mx-6 px-6 pb-4" 
+                                mode === 'gif'
+                                    ? "border-pink-300 dark:border-pink-500/30 bg-pink-100 dark:bg-pink-500/5 -mx-6 px-6 pb-4"
                                     : "border-border dark:border-white/5"
                             )}>
                                 <h4 className={cn(
                                     "text-sm font-bold mb-4 flex items-center gap-2 uppercase tracking-wider",
-                                    mode === 'gif' 
-                                        ? "text-pink-600 dark:text-pink-400" 
+                                    mode === 'gif'
+                                        ? "text-pink-600 dark:text-pink-400"
                                         : "text-muted-foreground"
                                 )}>
-                                    <Scissors className={cn("w-3 h-3", mode === 'gif' ? "text-pink-600 dark:text-pink-400" : "text-orange-500 dark:text-orange-400")} /> 
-                                    {mode === 'gif' 
-                                        ? (t.gif_maker?.trim_required || "✂️ Trim Required") 
+                                    <Scissors className={cn("w-3 h-3", mode === 'gif' ? "text-pink-600 dark:text-pink-400" : "text-orange-500 dark:text-orange-400")} />
+                                    {mode === 'gif'
+                                        ? (t.gif_maker?.trim_required || "✂️ Trim Required")
                                         : (t.clip_label || "Clip Video")}
                                     {mode === 'gif' && (
                                         <span className="ml-auto text-[10px] font-medium bg-pink-200 dark:bg-pink-500/20 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded-full">
@@ -178,29 +155,25 @@ export function RightPanel({
                                         </span>
                                     )}
                                 </h4>
-                                
+
                                 {mode === 'gif' && (
                                     <div className="text-xs text-pink-600 dark:text-pink-300/80 mb-3 leading-relaxed">
                                         {t.gif_maker?.trim_desc || "GIF format requires trimming. Select a short clip (max 30 seconds) for best results."}
                                     </div>
                                 )}
-                                
-                                <ClipSection 
+
+                                <ClipSection
                                     options={options}
                                     setters={setters}
                                     duration={meta?.duration}
                                     t={t}
                                     maxDuration={mode === 'gif' ? 30 : undefined}
                                 />
-                                <HelpTip show={showHelp} text={mode === 'gif' 
-                                    ? "GIF creation requires a short clip. Keep it under 30 seconds for reasonable file size."
-                                    : (t.help?.clip_help || "Use Scissors to grab a specific moment.")} 
-                                />
                             </div>
                         )}
 
                         <div className="pt-4 border-t border-white/5">
-                            <button 
+                            <button
                                 type="button"
                                 onClick={() => setShowEnhancements(!showEnhancements)}
                                 className="w-full flex items-center justify-between group py-2"
@@ -212,7 +185,7 @@ export function RightPanel({
                                     <ChevronDown className="w-4 h-4" />
                                 </div>
                             </button>
-                            
+
                             <AnimatePresence>
                                 {showEnhancements && (
                                     <motion.div
@@ -224,17 +197,30 @@ export function RightPanel({
                                         <div className="flex flex-col gap-3">
                                             {options.format !== 'gif' && isYouTubeUrl(url) && (
                                                 <>
-                                                    <div onClick={() => setters.setSponsorBlock(!options.sponsorBlock)} className={cn("flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all min-h-[64px]", options.sponsorBlock ? "bg-red-500/10 border-red-500/30" : "bg-transparent border-white/5 hover:bg-white/5")}>
+                                                    <div
+                                                        onClick={() => !options.isClipping && setters.setSponsorBlock(!options.sponsorBlock)}
+                                                        className={cn(
+                                                            "flex items-center justify-between p-3 rounded-xl border transition-all min-h-[64px]",
+                                                            options.sponsorBlock ? "bg-red-500/10 border-red-500/30" : "bg-transparent border-white/5",
+                                                            options.isClipping ? "opacity-50 cursor-not-allowed border-dashed" : "cursor-pointer hover:bg-white/5"
+                                                        )}
+                                                    >
                                                         <div className="flex items-center gap-3 min-w-0">
                                                             <div className={cn("p-1.5 rounded-lg shrink-0", options.sponsorBlock ? "bg-red-500 text-white" : "bg-white/10 text-muted-foreground")}><AlertCircle className="w-4 h-4" /></div>
                                                             <div className="min-w-0">
                                                                 <div className="font-bold text-[0.93rem] leading-none truncate">{t.remove_sponsors}</div>
-                                                                <div className="text-xs text-muted-foreground mt-0.5 opacity-80 truncate">{t.remove_sponsors_desc}</div>
+                                                                <div className="text-xs text-muted-foreground mt-0.5 opacity-80 truncate">
+                                                                    {options.isClipping ? (t.sponsor_clip_conflict || "Unavailable while cutting video") : t.remove_sponsors_desc}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <Switch checked={options.sponsorBlock} onCheckedChange={setters.setSponsorBlock} className="data-[state=checked]:bg-red-500 scale-90 shrink-0 ml-2" />
+                                                        <Switch
+                                                            checked={options.sponsorBlock}
+                                                            onCheckedChange={setters.setSponsorBlock}
+                                                            disabled={options.isClipping}
+                                                            className="data-[state=checked]:bg-red-500 scale-90 shrink-0 ml-2"
+                                                        />
                                                     </div>
-                                                    <HelpTip show={showHelp} text={t.help?.sponsor_help || "Automatically cuts out sponsor segments."} />
                                                 </>
                                             )}
 
@@ -251,19 +237,6 @@ export function RightPanel({
                                                 </div>
                                             )}
 
-                                            {options.format !== 'audio' && options.format !== 'gif' && isYouTubeUrl(url) && (meta?.is_live) && (
-                                                <div onClick={() => setters.setLiveFromStart(!options.liveFromStart)} className={cn("flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all min-h-[64px]", options.liveFromStart ? "bg-green-500/10 border-green-500/30" : "bg-transparent border-white/5 hover:bg-white/5")}>
-                                                    <div className="flex items-center gap-3 min-w-0">
-                                                        <div className={cn("p-1.5 rounded-lg shrink-0", options.liveFromStart ? "bg-green-500 text-white" : "bg-white/10 text-muted-foreground")}><Radio className="w-4 h-4" /></div>
-                                                        <div className="min-w-0">
-                                                            <div className="font-bold text-[0.93rem] leading-none truncate">{t.live_from_start || 'Live from Start'}</div>
-                                                            <div className="text-xs text-muted-foreground mt-0.5 opacity-80 truncate">{t.live_from_start_desc || 'Download from start'}</div>
-                                                        </div>
-                                                    </div>
-                                                    <Switch checked={options.liveFromStart} onCheckedChange={setters.setLiveFromStart} className="data-[state=checked]:bg-green-500 scale-90 shrink-0 ml-2" />
-                                                </div>
-                                            )}
-
                                             {options.format !== 'gif' && isYouTubeUrl(url) && (meta?.chapters && meta.chapters.length > 0) && (
                                                 <div onClick={() => setters.setSplitChapters(!options.splitChapters)} className={cn("flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all min-h-[64px]", options.splitChapters ? "bg-blue-500/10 border-blue-500/30" : "bg-transparent border-white/5 hover:bg-white/5")}>
                                                     <div className="flex items-center gap-3 min-w-0">
@@ -276,6 +249,64 @@ export function RightPanel({
                                                         </div>
                                                     </div>
                                                     <Switch checked={options.splitChapters} onCheckedChange={setters.setSplitChapters} className="data-[state=checked]:bg-blue-500 scale-90 shrink-0 ml-2" />
+                                                </div>
+                                            )}
+
+                                            {/* Video Codec Selection (Advanced) */}
+                                            {options.format === 'video' && (
+                                                <div className="p-3 rounded-xl border bg-transparent border-white/5 space-y-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <Cpu className="w-4 h-4 text-emerald-400" />
+                                                        <span className="text-xs font-bold uppercase text-emerald-400">{t.video_codec || "Video Codec"}</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {['auto', 'h264', 'av1', 'vp9', 'hevc'].map((c) => {
+                                                            const isAvailableOnServer = availableVideoCodecs?.includes(c) || c === 'auto';
+
+                                                            // Safety Guard: Container Compatibility
+                                                            let isCompatible = true
+                                                            if (c !== 'auto') {
+                                                                if (options.container === 'mov') {
+                                                                    // Apple safe: H.264, HEVC (ProRes not implemented yet)
+                                                                    isCompatible = ['h264', 'hevc'].includes(c)
+                                                                } else if (options.container === 'webm') {
+                                                                    // Web safe: VP9, AV1
+                                                                    isCompatible = ['vp9', 'av1'].includes(c)
+                                                                } else if (options.container === 'mp4') {
+                                                                    // MP4 mostly H.264/HEVC. AV1 is new but getting there. VP9 is risky in MP4.
+                                                                    isCompatible = ['h264', 'hevc', 'av1'].includes(c)
+                                                                }
+                                                            }
+
+                                                            const isDisabled = !isAvailableOnServer || !isCompatible
+
+                                                            return (
+                                                                <button
+                                                                    key={c}
+                                                                    type="button"
+                                                                    onClick={() => setters.setVideoCodec(c)}
+                                                                    disabled={isDisabled}
+                                                                    title={!isCompatible ? `Not supported in .${options.container} container` : !isAvailableOnServer ? "Not available for this video" : ""}
+                                                                    className={cn(
+                                                                        "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border transition-all",
+                                                                        options.videoCodec === c
+                                                                            ? "bg-emerald-500 text-white border-emerald-400 shadow-sm ring-1 ring-emerald-400/50"
+                                                                            : !isDisabled
+                                                                                ? "bg-secondary/30 text-muted-foreground border-transparent hover:bg-secondary hover:text-foreground"
+                                                                                : "opacity-40 cursor-not-allowed bg-secondary/10 text-muted-foreground/50 border-transparent border-dashed"
+                                                                    )}
+                                                                >
+                                                                    {c.toUpperCase()}
+                                                                </button>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                    {options.videoCodec !== 'auto' && options.videoCodec !== 'h264' && (
+                                                        <div className="flex items-start gap-2 text-[10px] text-yellow-500/80 bg-yellow-500/5 p-2 rounded-lg border border-yellow-500/10">
+                                                            <TriangleAlert className="w-3 h-3 shrink-0 mt-0.5" />
+                                                            <span>{t.codec_warning || "Some codecs may not play on older devices. H264 is safest."}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
@@ -294,10 +325,10 @@ export function RightPanel({
                                                     </div>
                                                     <Switch checked={options.isScheduled} onCheckedChange={setters.setIsScheduled} className="data-[state=checked]:bg-orange-500 scale-90" />
                                                 </div>
-                                                
+
                                                 <AnimatePresence>
                                                     {options.isScheduled && (
-                                                        <motion.div 
+                                                        <motion.div
                                                             initial={{ height: 0, opacity: 0 }}
                                                             animate={{ height: "auto", opacity: 1 }}
                                                             exit={{ height: 0, opacity: 0 }}
@@ -307,9 +338,9 @@ export function RightPanel({
                                                                 <div className="flex items-center gap-2 text-xs font-bold uppercase text-orange-400">
                                                                     <Clock className="w-3 h-3" /> {t.schedule_time}
                                                                 </div>
-                                                                <CustomDateTimePicker 
-                                                                    value={options.scheduleTime} 
-                                                                    onChange={setters.setScheduleTime} 
+                                                                <CustomDateTimePicker
+                                                                    value={options.scheduleTime}
+                                                                    onChange={setters.setScheduleTime}
                                                                     t={t}
                                                                 />
                                                             </div>
@@ -342,7 +373,7 @@ export function RightPanel({
 
                                                     <AnimatePresence>
                                                         {options.subtitles && (
-                                                            <motion.div 
+                                                            <motion.div
                                                                 initial={{ height: 0, opacity: 0 }}
                                                                 animate={{ height: "auto", opacity: 1 }}
                                                                 exit={{ height: 0, opacity: 0 }}

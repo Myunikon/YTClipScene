@@ -10,6 +10,7 @@
     "core:window:allow-destroy",
     "core:window:allow-hide",
     "core:window:allow-show",
+    "core:window:allow-minimize",
     "core:window:allow-set-fullscreen",
     "core:window:allow-start-dragging",
     "os:default",
@@ -22,10 +23,18 @@
     {
       "identifier": "opener:allow-open-path",
       "allow": [
-        { "path": "$HOME/**" },
-        { "path": "$DOWNLOAD/**" },
-        { "path": "$APP_DATA/**" },
-        { "path": "$APPDATA/**" } 
+        {
+          "path": "$HOME/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$APP_DATA/**"
+        },
+        {
+          "path": "$APPDATA/**"
+        }
       ]
     },
     "shell:allow-open",

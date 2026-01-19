@@ -2,8 +2,8 @@
 // Constants
 // Permissive Regex: Allow any HTTP/HTTPS URL
 // We let yt-dlp determine validity.
-const VIDEO_URL_REGEX = /^https?:\/\/.+/i
-const MAX_URL_LENGTH = 2000 // Increased for long tokens
+export const VIDEO_URL_REGEX = /^https?:\/\/.+/i
+export const MAX_URL_LENGTH = 2000 // Increased for long tokens
 
 /**
  * Validates a potential video URL.

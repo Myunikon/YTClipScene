@@ -22,7 +22,7 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
     const [showCommandModal, setShowCommandModal] = useState(false)
     const [showCancelConfirm, setShowCancelConfirm] = useState(false)
     const [showClipPauseWarning, setShowClipPauseWarning] = useState(false)
-    
+
     // Check if this is a clipped download
     const isClipped = task.range !== 'Full'
 
@@ -35,12 +35,12 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
                 console.error('Failed to open file:', e);
                 const fileName = target.split(/[/\\]/).pop() || 'File';
                 const tErrors = translations[settings.language as keyof typeof translations].settings.advanced.errors;
-                
+
                 notify.error(`${fileName}`, {
                     description: tErrors.file_desc,
                     action: task.path ? {
                         label: tErrors.open_folder,
-                        onClick: () => openPath(task.path!).catch(() => {})
+                        onClick: () => openPath(task.path!).catch(() => { })
                     } : undefined,
                     duration: 5000
                 });
@@ -66,27 +66,32 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
     return (
         <>
             <div className="bg-card border rounded-xl p-4 md:px-4 md:py-3 shadow-sm hover:shadow-md transition-shadow grid grid-cols-1 md:grid-cols-[3fr_100px_3fr_auto] gap-4 items-center group relative overflow-hidden">
-                
+
                 {/* 1. Title & Info */}
                 <div className="min-w-0 flex flex-col justify-center z-10 gap-0.5">
-                    <div 
+                    <div
                         className={cn(
-                            "font-bold truncate text-sm transition-colors", 
-                            task.status === 'completed' 
-                                ? "cursor-pointer hover:text-primary hover:underline underline-offset-4 decoration-primary/50" 
+                            "font-bold truncate text-sm transition-colors",
+                            task.status === 'completed'
+                                ? "cursor-pointer hover:text-primary hover:underline underline-offset-4 decoration-primary/50"
                                 : ""
-                        )} 
+                        )}
                         title={task.title || task.url}
                         onClick={task.status === 'completed' ? handleOpenFile : undefined}
                     >
                         {task.title || 'Fetching info...'}
                     </div>
                     <div className="text-xs text-muted-foreground truncate opacity-70 font-mono">{task.url}</div>
-                    
+
                     <div className="flex flex-wrap gap-2 mt-1.5">
                         {task.range && task.range !== 'Full' && (
                             <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md dark:bg-amber-500/20 dark:text-amber-400 font-mono border border-amber-200 dark:border-amber-500/30">
                                 ✂ Clip: {formatRange(task.range)}
+                            </span>
+                        )}
+                        {task.audioNormalization && (
+                            <span className="text-[10px] font-bold bg-pink-100 text-pink-700 px-2 py-0.5 rounded-md dark:bg-pink-500/20 dark:text-pink-400 font-mono border border-pink-200 dark:border-pink-500/30">
+                                ♪ Normalized
                             </span>
                         )}
                         {task.status === 'error' && task.log && (
@@ -112,15 +117,15 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
                 <div className="min-w-0 z-10 w-full">
                     <div className="flex items-center gap-3 w-full">
                         <div className="flex-1 bg-secondary/50 h-2 rounded-full overflow-hidden border border-black/5 dark:border-white/5">
-                            <div 
-                                className={cn("h-full relative overflow-hidden", 
+                            <div
+                                className={cn("h-full relative overflow-hidden",
                                     task.status === 'error' ? "bg-red-500" : "bg-primary",
                                     !settings.lowPerformanceMode && "transition-all duration-300 ease-out"
                                 )}
-                                style={{ 
+                                style={{
                                     width: `${task.progress}%`,
                                     backgroundImage: !settings.lowPerformanceMode && (task.concurrentFragments || 1) > 1 && task.status === 'downloading'
-                                        ? 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)' 
+                                        ? 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)'
                                         : 'none',
                                     backgroundSize: '1rem 1rem'
                                 }}
@@ -133,10 +138,10 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
                         </div>
                         <span className="text-xs font-mono font-bold w-10 text-right tabular-nums text-muted-foreground">{task.progress.toFixed(0)}%</span>
                     </div>
-                    
+
                     <div className="flex justify-between text-[11px] text-muted-foreground/80 mt-1.5 font-semibold uppercase tracking-wide items-center h-4">
                         {task.statusDetail ? (
-                             <span className={cn("text-orange-500/90 truncate", !settings.lowPerformanceMode && "animate-pulse")}>{task.statusDetail}</span>
+                            <span className={cn("text-orange-500/90 truncate", !settings.lowPerformanceMode && "animate-pulse")}>{task.statusDetail}</span>
                         ) : (
                             <div className="flex gap-3">
                                 <span className="font-mono">{task.speed || '0 B/s'}</span>
@@ -158,9 +163,9 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
                 <div className="flex items-center justify-end gap-1 z-10 pt-2 md:pt-0 border-t md:border-0 border-dashed border-border/50 mt-2 md:mt-0">
                     {/* Developer Mode or Error: Terminal Icon to view logs */}
                     {(settings.developerMode || task.status === 'error') && (
-                        <button 
+                        <button
                             onClick={() => setShowCommandModal(true)}
-                            className="p-2 hover:bg-purple-500/10 text-purple-500 rounded-lg transition-colors" 
+                            className="p-2 hover:bg-purple-500/10 text-purple-500 rounded-lg transition-colors"
                             title="View Command Details"
                         >
                             <Terminal className="w-5 h-5 md:w-4 md:h-4" />
@@ -169,12 +174,12 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
 
                     {task.status === 'downloading' && (
                         <>
-                            <button 
-                                onClick={() => isClipped ? setShowClipPauseWarning(true) : pauseTask(task.id)} 
+                            <button
+                                onClick={() => isClipped ? setShowClipPauseWarning(true) : pauseTask(task.id)}
                                 className={cn(
                                     "p-2 rounded-lg transition-colors",
-                                    isClipped 
-                                        ? "hover:bg-orange-500/10 text-orange-500" 
+                                    isClipped
+                                        ? "hover:bg-orange-500/10 text-orange-500"
                                         : "hover:bg-yellow-500/10 text-yellow-600"
                                 )}
                                 title={isClipped ? t.pause_clip_tooltip : t.pause_download}
@@ -221,7 +226,7 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
                             </button>
                         </>
                     )}
-                        {task.status === 'completed' && (
+                    {task.status === 'completed' && (
                         <>
                             <button onClick={handleOpenFile} className="p-2 hover:bg-blue-500/10 text-blue-600 rounded-lg transition-colors" title={t.open_file}>
                                 <Play className="w-5 h-5 md:w-4 md:h-4" />
@@ -269,10 +274,10 @@ export function DownloadItem({ task, t }: DownloadItemProps) {
             />
 
             {/* Command Modal */}
-            <CommandModal 
-                task={task} 
-                isOpen={showCommandModal} 
-                onClose={() => setShowCommandModal(false)} 
+            <CommandModal
+                task={task}
+                isOpen={showCommandModal}
+                onClose={() => setShowCommandModal(false)}
             />
         </>
     )

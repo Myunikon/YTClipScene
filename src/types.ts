@@ -60,7 +60,6 @@ export interface DialogOptions {
     videoCodec: 'auto' | 'av1' | 'h264' | 'hevc' | 'vp9'
     // Enhancements
     sponsorBlock: boolean
-    liveFromStart: boolean
     splitChapters: boolean
     // Subtitles
     subtitles: boolean
@@ -93,7 +92,6 @@ export interface DialogOptionSetters {
     setAudioNormalization: (v: boolean) => void
     setVideoCodec: (v: any) => void
     setSponsorBlock: (v: boolean) => void
-    setLiveFromStart: (v: boolean) => void
     setSplitChapters: (v: boolean) => void
     setSubtitles: (v: boolean) => void
     setSubtitleLang: (v: string) => void

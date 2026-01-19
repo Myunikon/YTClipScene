@@ -12,10 +12,8 @@ export default defineConfig(async () => ({
   //
   // 1. prevent Vite from obscuring rust errors
   clearScreen: false,
-  
-  optimizeDeps: {
-    include: ['react-window', 'react-virtualized-auto-sizer'],
-  },
+
+
 
   // Build optimization
   build: {
@@ -65,10 +63,10 @@ export default defineConfig(async () => ({
     host: host || false,
     hmr: host
       ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
+        protocol: "ws",
+        host,
+        port: 1421,
+      }
       : undefined,
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`

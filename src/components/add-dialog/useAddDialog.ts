@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { invoke } from '@tauri-apps/api/core'
 import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { readText } from '@tauri-apps/plugin-clipboard-manager'
 import { downloadDir } from '@tauri-apps/api/path'
@@ -22,13 +23,13 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
 
     const [isOpen, setIsOpen] = useState(false)
     const [url, setUrl] = useState('')
-    
+
     // Grouped Option State
     // Always start with Video mode (Best) regardless of last used format
     const [format, setFormat] = useState('Best')
     const [path, setPath] = useState(
-        settings.lastDownloadOptions?.path || 
-        settings.downloadPath || 
+        settings.lastDownloadOptions?.path ||
+        settings.downloadPath ||
         ''
     )
     const [rangeStart, setRangeStart] = useState('')
@@ -45,16 +46,15 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
     const [isScheduled, setIsScheduled] = useState(false)
     const [scheduleTime, setScheduleTime] = useState('')
     const [videoCodec, setVideoCodec] = useState<'auto' | 'av1' | 'h264'>('auto')
-    const [liveFromStart, setLiveFromStart] = useState(false)
     const [splitChapters, setSplitChapters] = useState(false)
     const [container, setContainer] = useState<string>(
         settings.lastDownloadOptions?.container ||
-        settings.container || 
+        settings.container ||
         'mp4'
     )
     const [audioNormalization, setAudioNormalization] = useState(settings.audioNormalization)
     const [isClipping, setIsClipping] = useState(false)
-    
+
     // GIF Options State
     const [gifFps, setGifFps] = useState(15)
     const [gifScale, setGifScale] = useState(480)
@@ -65,7 +65,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
         format, container, path, customFilename,
         audioBitrate, audioFormat, audioNormalization,
         videoCodec,
-        sponsorBlock, liveFromStart, splitChapters,
+        sponsorBlock, splitChapters,
         subtitles, subtitleLang, subtitleFormat, embedSubtitles,
         isScheduled, scheduleTime,
         batchMode,
@@ -77,17 +77,17 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
         setFormat, setContainer, setPath, setCustomFilename,
         setAudioBitrate, setAudioFormat, setAudioNormalization,
         setVideoCodec,
-        setSponsorBlock, setLiveFromStart, setSplitChapters,
+        setSponsorBlock, setSplitChapters,
         setSubtitles, setSubtitleLang, setSubtitleFormat, setEmbedSubtitles,
         setIsScheduled, setScheduleTime,
         setBatchMode,
         setIsClipping, setRangeStart, setRangeEnd,
         setGifFps, setGifScale, setGifQuality
     }
-    
+
     // Auto-paste initial URL
     useEffect(() => {
-        if(initialUrl) setUrl(initialUrl)
+        if (initialUrl) setUrl(initialUrl)
     }, [initialUrl])
 
     // Metadata State
@@ -115,7 +115,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
                 const { getYtDlpCommand } = await import('../../lib/ytdlp')
                 const cmd = await getYtDlpCommand(['--dump-json', '--no-warnings', '--', url])
                 const output = await cmd.execute()
-                
+
                 if (output.code === 0) {
                     const data = parseYtDlpJson(output.stdout)
                     setMeta(data)
@@ -159,12 +159,25 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
     }, [isOpen])
 
     // Auto-enable Trim for GIFs to prevent huge files
-    // Auto-enable Trim for GIFs to prevent huge files
     useEffect(() => {
-        if (format === 'gif' && !isClipping) {
+        if (format === 'gif') {
             setIsClipping(true)
         }
-    }, [format, isClipping]) // Strongly enforce: If user tries to disable, it re-enables
+    }, [format])
+
+    // Safety Guard: Mutually Exclusive clipping & sponsor block
+    // Clipping relies on absolute timeline, SponsorBlock modifies it which breaks sync.
+    useEffect(() => {
+        if (isClipping) {
+            setSponsorBlock(false)
+        }
+    }, [isClipping])
+
+    // Safety Guard: Reset Codec when Container changes
+    // This prevents incompatible codecs (e.g. VP9) remaining selected when switching to strict containers (e.g. MOV)
+    useEffect(() => {
+        setVideoCodec('auto')
+    }, [container])
 
 
     // Compute Available Resolutions (Dynamic Formats)
@@ -180,7 +193,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
         const bitrates = meta.formats
             .filter((f: any) => f.acodec !== 'none' && f.abr)
             .map((f: any) => Math.round(f.abr))
-        
+
         // Group into common buckets to avoid weird numbers like 127kbps
         const buckets = [64, 128, 192, 256, 320]
         const valid = bitrates.reduce((acc: number[], cur: number) => {
@@ -189,7 +202,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
             if (!acc.includes(closest)) acc.push(closest)
             return acc
         }, [])
-        
+
         return valid.sort((a: number, b: number) => b - a)
     }, [meta])
 
@@ -197,29 +210,29 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
     const availableVideoCodecs = useMemo(() => {
         if (!meta?.formats) return undefined
         const codecs = new Set<string>()
-        
+
         meta.formats.forEach((f: any) => {
             if (!f.vcodec || f.vcodec === 'none') return
-            
+
             const v = f.vcodec.toLowerCase()
-            
+
             if (v.startsWith('avc1') || v.startsWith('h264')) codecs.add('h264')
             else if (v.startsWith('vp9')) codecs.add('vp9')
             else if (v.startsWith('av01')) codecs.add('av1')
             else if (v.startsWith('hev1') || v.startsWith('hvc1') || v.startsWith('hevc')) codecs.add('hevc')
         })
-        
+
         return Array.from(codecs)
     }, [meta])
 
-        // Compute Available Audio Codecs
+    // Compute Available Audio Codecs
     const availableAudioCodecs = useMemo(() => {
         if (!meta?.formats) return undefined
         const codecs = new Set<string>()
-        
+
         meta.formats.forEach((f: any) => {
             if (!f.acodec || f.acodec === 'none') return
-            
+
             const a = f.acodec.toLowerCase()
             if (a.startsWith('mp4a')) codecs.add('m4a')
             else if (a.includes('opus')) codecs.add('opus')
@@ -227,7 +240,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
             else if (a.includes('flac')) codecs.add('flac')
             else if (a.includes('wav')) codecs.add('wav')
         })
-        
+
         return Array.from(codecs)
     }, [meta])
 
@@ -235,12 +248,12 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
     const availableLanguages = useMemo(() => {
         const list = []
         const m = meta as any
-        
+
         // 1. Check Auto Captions
         if (m?.automatic_captions && Object.keys(m.automatic_captions).length > 0) {
             list.push({ id: 'auto', label: 'Auto (AI)' })
         }
-        
+
         // 2. Check Manual Subtitles
         if (m?.subtitles && Object.keys(m.subtitles).length > 0) {
             // Extract distinct languages from manual subtitles
@@ -251,18 +264,18 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
             })
             realLangs.sort((a, b) => a.label.localeCompare(b.label))
             list.push(...realLangs)
-            
+
             // Add 'All' if we have manual subs
             list.push({ id: 'all', label: 'All' })
         }
-        
+
         return list
     }, [meta])
 
     // Memoize Estimated Size Calculation to prevent re-renders in View
     const estimatedSize = useMemo(() => {
         if (!meta?.filesize_approx && !meta?.formats) return 0
-        
+
         const total = meta.duration || 1
         let ratio = 1
         if (isClipping) {
@@ -271,7 +284,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
             const duration = Math.max(0, Math.min(e, total) - Math.max(0, s))
             ratio = duration / total
         }
-        
+
         let baseSize = 0
         if (meta.formats) {
             const audioFormats = meta.formats.filter((f: any) => f.acodec !== 'none' && f.vcodec === 'none')
@@ -281,7 +294,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
             if (format === 'audio') {
                 const targetBitrate = parseInt(audioBitrate) || 128
                 if (audioFormats.length > 0) {
-                    const targetAudio = audioFormats.reduce((prev: any, curr: any) => 
+                    const targetAudio = audioFormats.reduce((prev: any, curr: any) =>
                         (Math.abs((curr.abr || 0) - targetBitrate) < Math.abs((prev.abr || 0) - targetBitrate) ? curr : prev)
                     )
                     baseSize = targetAudio?.filesize || targetAudio?.filesize_approx || audioSize
@@ -296,7 +309,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
                 const fps = gifFps || 15
                 // Base factor: 480p @ 15fps ~ 4Mbit/s ~ 0.5MB/s
                 const baseFactor = (h / 480) * (fps / 15) * 0.5 * 1024 * 1024
-                
+
                 // We'll multiply this by duration (which is handled by ratio * total) later
                 // So here we set baseSize as "Total Projected Size if Full Duration"
                 baseSize = baseFactor * total
@@ -313,11 +326,11 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
                 } else {
                     baseSize = meta.filesize_approx || 0
                 }
-            } 
+            }
         } else {
             baseSize = meta.filesize_approx || 0
         }
-        
+
         return baseSize * ratio
     }, [meta, format, audioBitrate, isClipping, rangeStart, rangeEnd, gifScale, gifFps])
 
@@ -338,9 +351,9 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
     }
 
     const handleSubmit = async (e?: React.FormEvent) => {
-        if(e) e.preventDefault()
+        if (e) e.preventDefault()
         let savePath = path
-        
+
         // Always Ask Where to Save
         if (settings.alwaysAskPath && !path) {
             const selectedPath = await openDialog({ directory: true, title: 'Choose Download Location' })
@@ -355,13 +368,13 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
 
         const start = isClipping ? rangeStart : ''
         const end = isClipping ? rangeEnd : ''
-        
-        const urls = batchMode 
+
+        const urls = batchMode
             ? url.split('\n').map(u => u.trim()).filter(u => u.length > 0 && u.startsWith('http'))
             : [url.trim()]
-        
+
         for (const singleUrl of urls) {
-            addTask(singleUrl, { 
+            addTask(singleUrl, {
                 path: savePath,
                 format,
                 container,
@@ -370,7 +383,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
                 rangeEnd: isClipping ? end : undefined,
                 audioBitrate,
                 audioFormat,
-                
+
                 removeSponsors: sponsorBlock,
                 subtitles,
                 subtitleLang: subtitles ? subtitleLang : undefined,
@@ -378,7 +391,6 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
                 embedSubtitles: subtitles ? embedSubtitles : false,
                 videoCodec,
                 forceTranscode: videoCodec !== 'auto' && availableVideoCodecs && !availableVideoCodecs.includes(videoCodec),
-                liveFromStart,
                 splitChapters,
                 scheduledTime: isScheduled && scheduleTime ? new Date(scheduleTime).toISOString() : undefined,
                 audioNormalization,
@@ -422,7 +434,7 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
         } catch (e) {
             console.warn('Tauri clipboard failed, trying Web API', e);
         }
-        
+
         try {
             const text = await navigator.clipboard.readText();
             if (text) setUrl(text);
@@ -434,20 +446,43 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
 
     const quickDownload = async (targetUrl: string) => {
         if (!settings.quickDownloadEnabled || !settings.lastDownloadOptions) {
-            return false 
+            return false
         }
-        
+
         const lastOpts = settings.lastDownloadOptions
         const savePath = lastOpts.path || settings.downloadPath || await downloadDir()
-        
+
         addTask(targetUrl, {
             ...lastOpts,
             path: savePath,
             customFilename: undefined
         })
-        
+
         return true
     }
+
+    // Disk Space Check
+    const [diskFreeSpace, setDiskFreeSpace] = useState<number | null>(null)
+
+    useEffect(() => {
+        if (!isOpen) return
+
+        const checkDisk = async () => {
+            try {
+                // Fetch stats for the target drive
+                const res: any = await invoke('get_system_stats', { downloadPath: path || '.' })
+                if (res && typeof res.disk_free === 'number') {
+                    setDiskFreeSpace(res.disk_free)
+                }
+            } catch (e) {
+                // Silent fail is fine, we just won't warn
+            }
+        }
+
+        checkDisk()
+    }, [path, isOpen])
+
+    const isDiskFull = !!(estimatedSize > 0 && diskFreeSpace !== null && estimatedSize > diskFreeSpace)
 
     return {
         isOpen, setIsOpen,
@@ -459,6 +494,8 @@ export function useAddDialog({ addTask, initialUrl, previewLang }: UseAddDialogP
         t,
         formatFileSize,
         estimatedSize, // Return calculated size
-        settings
+        settings,
+        isDiskFull,
+        diskFreeSpace
     }
 }

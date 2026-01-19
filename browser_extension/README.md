@@ -1,6 +1,6 @@
-# ClipScene Browser Extension
+# SceneClip Browser Extension
 
-This extension integrates your browser with the ClipScene desktop application.
+This extension integrates your browser with the SceneClip desktop application.
 
 ## Installation Instructions
 

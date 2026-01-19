@@ -47,6 +47,7 @@ export interface DownloadTask {
   fileSize?: string
   completedAt?: number
   chapters?: any[] // Store chapters for sequential splitting
+  audioNormalization?: boolean // Persisted for UI indicator (Loudness Normalization applied)
 }
 
 
@@ -77,7 +78,7 @@ export interface AppSettings {
   lowPerformanceMode: boolean
   frontendFontSize: 'small' | 'medium' | 'large'
 
-  
+
   // Advanced
   cookieSource: 'none' | 'browser' | 'txt'
   browserType?: 'chrome' | 'edge' | 'firefox' | 'opera' | 'brave' | 'vivaldi' | 'chromium' | 'safari'
@@ -134,22 +135,22 @@ export interface SystemSlice {
   gpuType: 'cpu' | 'nvidia' | 'amd' | 'intel'
   gpuModel?: string
   gpuRenderer?: string
-  
+
   // yt-dlp Version Tracking
   ytdlpVersion: string | null
   ytdlpLatestVersion: string | null
   ytdlpNeedsUpdate: boolean
-  
+
   // FFmpeg Version Tracking
   ffmpegVersion: string | null
   ffmpegLatestVersion: string | null
   ffmpegNeedsUpdate: boolean
-  
+
   // Loading state for version check
   isCheckingUpdates: boolean
-  
+
   setBinariesReady: (ready: boolean) => void
-  
+
   detectHardwareAccel: () => Promise<void>
   initListeners: () => void
   checkBinaryUpdates: () => Promise<void> // Check for updates (replaces checkYtDlpUpdate + updateYtDlp)
