@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Myunikon/SceneClip/main/public/sceneclip-banner.png" width="600" alt="SceneClip Banner"/>
+  <img src="./public/sceneclip-banner.png" width="600" alt="SceneClip Banner"/>
 </p>
 
 <h1 align="center">SceneClip 🎬</h1>
@@ -30,7 +30,12 @@
 ---
 
 <p align="center">
-  <img src="https://via.placeholder.com/800x450.png?text=SceneClip+Demo+GIF+Placeholder" alt="SceneClip Interface Preview" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"/>
+  <img src="./public/sceneclip-preview.png" alt="SceneClip Main Interface" width="90%" style="border-radius: 8px;"/>
+</p>
+
+<p align="center">
+  <img src="./public/sceneclip-preview1.png" alt="SceneClip Download Options" width="45%"/>
+  <img src="./public/sceneclip-preview2.png" alt="SceneClip Settings" width="45%"/>
 </p>
 
 ---
